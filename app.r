@@ -83,8 +83,9 @@ plain <- function(x,...) format(x, ..., scientific = FALSE, drop0trailing = TRUE
 ########### 1 - create used interface ###########
 
 ui <- fluidPage(
-  navbarPage(     #also possible: tabsetPanel(
-    "Red Kite Kernel home ranges",
+  navbarPage(
+ #tabsetPanel(
+    "5 day-window Kernel home ranges",
     # Two tabs, one for a specific individual, the other as overview of home range development for all kites
     tabPanel("Individuals",
              # App title
@@ -443,7 +444,7 @@ server <- function(input, output){
         color = ~pal(julian),
         stroke = FALSE, fillOpacity = 1,
         popup = ~ paste0(START_DATE,"<br>home range: ", AREA_KM2, " km<sup>2</sup><br>",
-                         settlement.year)
+                         settlement.year,"<br>GPS points: ", NR_POINTS)
       ) %>% 
       addCircleMarkers( #indicator for migration dates
         data=sub_setkde_cutoff.m2(),
@@ -592,7 +593,7 @@ server <- function(input, output){
     p5.5
     
   })
-} 
+}
 
 
 ############### 3 - start shinyApp ##############
