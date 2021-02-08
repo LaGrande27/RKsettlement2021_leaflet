@@ -172,7 +172,7 @@ ui <- fluidPage(
                         selectInput(inputId = "colouration.All", label=h5("Colour coding"), choices = c("Longitude"="Longitude",
                                                                                                         "Latitude"="Latitude",
                                                                                                         "Settlement Year"="Settlement Year"),
-                                    selected = "Longitude", multiple = F)
+                                    selected = "Settlement Year", multiple = F)
                         )
                       ),
                column(6,
