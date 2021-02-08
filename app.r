@@ -1,3 +1,23 @@
+packages<-function(x){
+  x<-as.character(match.call()[[2]])
+  if (!require(x,character.only=TRUE)){
+    install.packages(pkgs=x,repos="http://cran.r-project.org")
+    require(x,character.only=TRUE)
+  }
+ }
+
+packages(dplyr)
+packages(rgdal)
+packages(purrr)
+packages(ggplot2)
+packages(lubridate) #time stuff
+packages(viridis) #viridis color scale
+packages(shiny) #shiny app
+packages(ggmap) #if using maps in shiny output
+packages(leaflet) #map making
+packages(sf) #transforming data into WGS84 coordinates
+packages(htmltools) #if using browsable in leaflet
+
 library(dplyr)
 library(rgdal)
 library(purrr)
@@ -70,7 +90,7 @@ ui <- fluidPage(
              
              fluidRow(
                # Build selection tool for changing the individual to be displayed
-               column(4,
+               column(8,
                       wellPanel(
                         selectInput(inputId = "ID", label = "Red Kite", choices = unique(setkde$ID),
                                     selected = "KISW01", multiple = F))
