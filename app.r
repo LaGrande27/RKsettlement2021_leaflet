@@ -155,7 +155,7 @@ ui <- fluidPage(
              # Plots with overview graph left and zoom-graph right
              fluidRow(
                column(width = 12, #class = "well",
-                      h3("Spatial plots of home ranges below threshold"),
+                      h3("Map of home ranges below threshold"),
                       fluidRow(
                         column(width = 12,
                                leafletOutput("zoomplot", height = 500
