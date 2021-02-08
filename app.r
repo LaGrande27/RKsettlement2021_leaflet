@@ -10,6 +10,7 @@ packages(dplyr)
 packages(rgdal)
 packages(purrr)
 packages(ggplot2)
+packages(lemon) #for function facet_rep_wrap()
 packages(lubridate) #time stuff
 packages(viridis) #viridis color scale
 packages(shiny) #shiny app
@@ -22,6 +23,7 @@ library(dplyr)
 library(rgdal)
 library(purrr)
 library(ggplot2)
+library(lemon) #for function facet_rep_wrap()
 library(lubridate) #time stuff
 library(viridis) #viridis color scale
 library(shiny) #shiny app
