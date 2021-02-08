@@ -220,7 +220,7 @@ server <- function(input, output){
     # draw graph
     p2 <- sub_setkde() %>% ggplot(aes(x=DATE, y=AREA_KM2)) +
       geom_hline(yintercept=input$cutoff, size=0.1) +
-      geom_line(aes(linetype=as.factor(YEAR)), col="grey", size=0.4) + 
+      geom_line(aes(linetype=YEAR), col="grey", size=0.4) + 
       scale_x_date(breaks = c(as.Date("2020-01-01"),as.Date("2020-02-01"),as.Date("2020-03-01"),as.Date("2020-04-01"),
                               as.Date("2020-05-01"),as.Date("2020-06-01"),as.Date("2020-07-01"),as.Date("2020-08-01"),
                               as.Date("2020-09-01"),as.Date("2020-10-01"),as.Date("2020-11-01"),as.Date("2020-12-01")),
@@ -245,30 +245,30 @@ server <- function(input, output){
         # function to use in ggplot for subsetting specific data
         #pick <- function(condition){ function(d) d %>% filter(!!enquo(condition)) }
         #geom_point(data=pick(on.migration=="yes"), col="grey", cex=0.95) +
-        geom_point(aes(shape=as.factor(YEAR)), cex=ifelse(sub_setkde()$on.migration=="yes",2.5,0.05),
+        geom_point(aes(shape=YEAR), cex=ifelse(sub_setkde()$on.migration=="yes",2.5,0.05),
                    col="grey") +
-        geom_point(aes(shape=as.factor(YEAR)), cex=ifelse(sub_setkde()$departure.day=="yes",1.25,0.05),
+        geom_point(aes(shape=YEAR), cex=ifelse(sub_setkde()$departure.day=="yes",1.25,0.05),
                    col="black") +
-        geom_point(aes(shape=as.factor(YEAR)), cex=ifelse(sub_setkde()$arrival.day=="yes",1.25,0.05),
+        geom_point(aes(shape=YEAR), cex=ifelse(sub_setkde()$arrival.day=="yes",1.25,0.05),
                    col="black")
     }
     
     # change colouration
     if(input$colouration=="Longitude"){
       p2.5 <- p2 +
-        geom_point(aes(col=CENTER.LON_X, shape=as.factor(YEAR)), cex=0.9) +
+        geom_point(aes(col=CENTER.LON_X, shape=YEAR), cex=0.9) +
         scale_alpha(range = c(0.4, 1)) +
         viridis::scale_color_viridis(limits=c(min(setkde$CENTER.LON_X), max(setkde$CENTER.LON_X))) +
         labs(col = "Longitude")
     } else if(input$colouration == "Latitude"){
       p2.5 <- p2 +
-        geom_point(aes(col=CENTER.LAT_Y, shape=as.factor(YEAR)), cex=0.9) +
+        geom_point(aes(col=CENTER.LAT_Y, shape=YEAR), cex=0.9) +
         viridis::scale_color_viridis(limits=c(min(setkde$CENTER.LAT_Y), max(setkde$CENTER.LAT_Y))) +
         labs(col = "Latitude")
     } else if(input$colouration == "Settlement Year"){
       p2.5 <- p2 +
         geom_point(aes(col=settlement.year,
-                       shape=as.factor(YEAR)), cex=0.9) +
+                       shape=YEAR), cex=0.9) +
         scale_colour_manual("", values = c("3y before settling"="#440154FF", 
                                            "2y before settling"="#39568CFF", 
                                            "1y before settling"="#1F968BFF", 
@@ -476,7 +476,7 @@ server <- function(input, output){
     
     p5 <- setkde %>% ggplot(aes(x=DATE, y=AREA_KM2)) +
       geom_hline(yintercept=input$cutoff, size=0.1) +
-      geom_line(aes(linetype=as.factor(YEAR)), col="grey", size=0.4) + 
+      geom_line(aes(linetype=YEAR), col="grey", size=0.4) + 
       scale_x_date(breaks = c(as.Date("2020-01-01"),as.Date("2020-02-01"),as.Date("2020-03-01"),as.Date("2020-04-01"),
                               as.Date("2020-05-01"),as.Date("2020-06-01"),as.Date("2020-07-01"),as.Date("2020-08-01"),
                               as.Date("2020-09-01"),as.Date("2020-10-01"),as.Date("2020-11-01"),as.Date("2020-12-01")),
@@ -497,74 +497,71 @@ server <- function(input, output){
     
     if(input$checkbox==TRUE){
       p5 <- p5 +
-        geom_point(aes(shape=as.factor(YEAR)), cex=ifelse(setkde$on.migration=="yes",2.5,0.05),
+        geom_point(aes(shape=YEAR), cex=ifelse(setkde$on.migration=="yes",2.5,0.05),
                    col="grey") +
-        geom_point(aes(shape=as.factor(YEAR)), cex=ifelse(setkde$departure.day=="yes",1.25,0.05),
+        geom_point(aes(shape=YEAR), cex=ifelse(setkde$departure.day=="yes",1.25,0.05),
                    col="black") +
-        geom_point(aes(shape=as.factor(YEAR)), cex=ifelse(setkde$arrival.day=="yes",1.25,0.05),
+        geom_point(aes(shape=YEAR), cex=ifelse(setkde$arrival.day=="yes",1.25,0.05),
                    col="black")
     }
     
     if(input$datasecurity==TRUE){
       if(input$colouration.All=="Longitude"){
         p5.5 <- p5 +
-          geom_point(aes(col=CENTER.LON_X, shape=as.factor(YEAR)), cex=0.5, alpha=0.2) +
-          geom_point(aes(col=CENTER.LON_X, shape=as.factor(YEAR)), cex=1.4, data=subset(setkde, NR_POINTS<30), alpha=0.7) +
-          geom_point(aes(col=CENTER.LON_X, shape=as.factor(YEAR)), cex=4, data=subset(setkde, NR_POINTS<20)) +
-          #geom_point(aes(col=CENTER.LON_X, shape=as.factor(YEAR)), cex=4, data=subset(setkde, NR_POINTS<=4*input$window.length)) +
+          geom_point(aes(col=CENTER.LON_X, shape=YEAR), cex=0.5, alpha=0.2) +
+          geom_point(aes(col=CENTER.LON_X, shape=YEAR), cex=1.4, data=subset(setkde, NR_POINTS<30), alpha=0.7) +
+          geom_point(aes(col=CENTER.LON_X, shape=YEAR), cex=4, data=subset(setkde, NR_POINTS<20)) +
+          #geom_point(aes(col=CENTER.LON_X, shape=YEAR), cex=4, data=subset(setkde, NR_POINTS<=4*input$window.length)) +
           viridis::scale_color_viridis(limits=c(min(setkde$CENTER.LON_X), max(setkde$CENTER.LON_X))) +
           labs(col = "Longitude")
       }else if(input$colouration.All == "Latitude"){
         p5.5 <- p5 +
-          geom_point(aes(col=CENTER.LAT_Y, shape=as.factor(YEAR)), cex=0.5, alpha=0.2) +
-          geom_point(aes(col=CENTER.LAT_Y, shape=as.factor(YEAR)), cex=1.4, data=subset(setkde, NR_POINTS<30), alpha=0.7) +
-          geom_point(aes(col=CENTER.LAT_Y, shape=as.factor(YEAR)), cex=4, data=subset(setkde, NR_POINTS<20)) +
-          #geom_point(aes(col=CENTER.LAT_Y, shape=as.factor(YEAR)), cex=4, data=subset(setkde, NR_POINTS<=4*input$window.length)) +
+          geom_point(aes(col=CENTER.LAT_Y, shape=YEAR), cex=0.5, alpha=0.2) +
+          geom_point(aes(col=CENTER.LAT_Y, shape=YEAR), cex=1.4, data=subset(setkde, NR_POINTS<30), alpha=0.7) +
+          geom_point(aes(col=CENTER.LAT_Y, shape=YEAR), cex=4, data=subset(setkde, NR_POINTS<20)) +
+          #geom_point(aes(col=CENTER.LAT_Y, shape=YEAR), cex=4, data=subset(setkde, NR_POINTS<=4*input$window.length)) +
           viridis::scale_color_viridis(limits=c(min(setkde$CENTER.LAT_Y), max(setkde$CENTER.LAT_Y))) +
           labs(col = "Latitude")
       }else if(input$colouration.All == "Settlement Year"){
         p5.5 <- p5 +
-          geom_point(aes(col=factor(settlement.year, levels = c("3y_prior_sett", "2y_prior_sett", "1y_prior_sett",
-                                                                "sett_year", "1y_after_sett", "2y_after_sett")),
-                         shape=as.factor(YEAR)), cex=0.5, alpha=0.2) +
-          geom_point(aes(col=factor(settlement.year, levels = c("3y_prior_sett", "2y_prior_sett", "1y_prior_sett",
-                                                                "sett_year", "1y_after_sett", "2y_after_sett")),
-                         shape=as.factor(YEAR)), cex=1.4, data=subset(setkde, NR_POINTS<30), alpha=0.7) +
-          geom_point(aes(col=factor(settlement.year, levels = c("3y_prior_sett", "2y_prior_sett", "1y_prior_sett",
-                                                                "sett_year", "1y_after_sett", "2y_after_sett")),
-                         shape=as.factor(YEAR)), cex=4, data=subset(setkde, NR_POINTS<20)) +
-          scale_colour_manual("", values = c("3y_prior_sett"="#440154FF", 
-                                             "2y_prior_sett"="#39568CFF", 
-                                             "1y_prior_sett"="#1F968BFF", 
-                                             "sett_year"="#73D055FF", 
-                                             "1y_after_sett"="#FDE725FF", 
-                                             "2y_after_sett"="#FFCC00")) +
-          guides(color = guide_legend(nrow = 1))
+          geom_point(aes(col=settlement.year, shape=YEAR), 
+                     cex=0.5, alpha=0.2) +
+          geom_point(aes(col=settlement.year, shape=YEAR), 
+                     cex=1.4, data=subset(setkde, NR_POINTS<30), alpha=0.7) +
+          geom_point(aes(col=settlement.year, shape=YEAR), 
+                     cex=4, data=subset(setkde, NR_POINTS<20)) +
+          scale_colour_manual("", values = c("3y before settling"="#440154FF", 
+                                             "2y before settling"="#39568CFF", 
+                                             "1y before settling"="#1F968BFF", 
+                                             "settlement year"="#73D055FF", 
+                                             "1y after settling"="#FDE725FF", 
+                                             "2y after settling"="orange"),
+                              guide = guide_legend(override.aes = list(size=2),
+                                                   color = guide_legend(nrow = 1)))
         }
       } else {
     
         if(input$colouration.All=="Longitude"){
           p5.5 <- p5 +
-            geom_point(aes(col=CENTER.LON_X, shape=as.factor(YEAR)), cex=0.9, alpha=0.9) +
+            geom_point(aes(col=CENTER.LON_X, shape=YEAR), cex=0.9, alpha=0.9) +
             #scale_size(range=c(3,0.5), trans="log") +
             viridis::scale_color_viridis(limits=c(min(setkde$CENTER.LON_X), max(setkde$CENTER.LON_X))) +
             labs(col = "Longitude")
         }else if(input$colouration.All == "Latitude"){
           p5.5 <- p5 +
-            geom_point(aes(col=CENTER.LAT_Y, shape=as.factor(YEAR)), cex=0.9) +
+            geom_point(aes(col=CENTER.LAT_Y, shape=YEAR), cex=0.9) +
             viridis::scale_color_viridis(limits=c(min(setkde$CENTER.LAT_Y), max(setkde$CENTER.LAT_Y))) +
             labs(col = "Latitude")
         }else if(input$colouration.All == "Settlement Year"){
           p5.5 <- p5 +
-            geom_point(aes(col=factor(settlement.year, levels = c("3y_prior_sett", "2y_prior_sett", "1y_prior_sett",
-                                                                  "sett_year", "1y_after_sett", "2y_after_sett")),
-                           shape=as.factor(YEAR)), cex=0.9) +
-            scale_colour_manual("", values = c("3y_prior_sett"="#440154FF", 
-                                               "2y_prior_sett"="#39568CFF", 
-                                               "1y_prior_sett"="#1F968BFF", 
-                                               "sett_year"="#73D055FF", 
-                                               "1y_after_sett"="#FDE725FF", 
-                                               "2y_after_sett"="#FFCC00")) +
+            geom_point(aes(col=settlement.year,
+                           shape=YEAR), cex=0.9) +
+            scale_colour_manual("", values = c("3y before settling"="#440154FF", 
+                                               "2y before settling"="#39568CFF", 
+                                               "1y before settling"="#1F968BFF", 
+                                               "settlement year"="#73D055FF", 
+                                               "1y after settling"="#FDE725FF", 
+                                               "2y after settling"="orange")) +
             guides(color = guide_legend(nrow = 1, override.aes = list(size=0.9)), 
                    shape = guide_legend(override.aes = list(size=0.9)))
         }
@@ -573,8 +570,8 @@ server <- function(input, output){
     p5.5
     
   })
-}  
-  
+} 
+
 
 ############### 3 - start shinyApp ##############
 
