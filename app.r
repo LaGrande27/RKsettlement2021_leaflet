@@ -26,7 +26,7 @@ Sys.setlocale("LC_TIME", "C")  #set English hours for correct x-axis
 
 
 
-setkde <- read.table("KDEsettlers_per_5days_2ppd.csv"), header=T, dec=".", sep=" ")
+setkde <- read.table("KDEsettlers_per_5days_2ppd.csv", header=T, dec=".", sep=" ")
 settlers.nest <- read.table("list_of_nests_in_SettYear.csv", header=T, dec=".", sep=" ")
 
 setkde$START_DATE <- as.Date(setkde$START_DATE, format="%Y-%m-%d")
