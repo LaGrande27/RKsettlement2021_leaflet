@@ -1,30 +1,16 @@
 # checks if package is installed - if yes loads it (library/require), if not downloads it then loads it
-# from: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
 if (!require("pacman")) install.packages("pacman")
-# for shiny app
 pacman::p_load(dplyr, # always
                ggplot2,
                lemon, #for function facet_rep_wrap()
                lubridate, #time stuff
                viridis, #viridis color scale
                shiny, #shiny app
-               #ggmap, #if using maps with download tiles in shiny output
-               #rgdal, 
-               #purrr,
                leaflet, #map making
                sf, #transforming data into WGS84 coordinates
                htmltools) #if using browsable in leaflet to make legend size smaller
-# for the rest
-pacman::p_load(sp, #for SpatialPoints()
-               adehabitatHR, #for Kernel Density Estimation
-               parallel, #for using more than 1 core
-               geosphere #for function distm() in standardisation factor step
-               #stringi, #for stri_length function
-               #XML
-               )  
 
 options(scipen = 999) #R avoids scientific style of numbers (options(scipen=0) reset to default)
-
 Sys.setlocale("LC_TIME", "C")  #set English hours for correct x-axis
 
 
@@ -42,12 +28,14 @@ Sys.setlocale("LC_TIME", "C")  #set English hours for correct x-axis
 
 
 
-
 setkde <- read.table("KDEsettlers_per_5days_2ppd_standardisationFactor.csv", header=T, dec=".", sep=";")
 setkde.all <- read.table("KDE_AllSettlers_per_5days_2ppd_standardisationFactor.csv", header=T, dec=".", sep=";")
 settlers.nest <- read.table("list_of_nests_in2after_SettYear.csv", header=T, dec=".", sep=";")
-non.migration.settl.Points <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints.csv", header=T, dec=".", sep=";")
-
+non.migration.settl.Points1 <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints_GITHUB1.csv", header=T, dec=".", sep=";")
+non.migration.settl.Points2 <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints_GITHUB2.csv", header=T, dec=".", sep=";")
+non.migration.settl.Points3 <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints_GITHUB3.csv", header=T, dec=".", sep=";")
+non.migration.settl.Points4 <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints_GITHUB4.csv", header=T, dec=".", sep=";")
+non.migration.settl.Points <- rbind(non.migration.settl.Points1, non.migration.settl.Points2, non.migration.settl.Points3, non.migration.settl.Points4)
 
 # dataset: setkde ----------------------------------------------------
 setkde$START_DATE <- as.Date(setkde$START_DATE, format="%Y-%m-%d")
