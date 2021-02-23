@@ -216,7 +216,7 @@ ui <- fluidPage(
                         )
                       ),
                column(3,
-                      h5("Data Confidence"),
+                      h5("Data Standardisation"),
                       checkboxInput(inputId = "checkbox.standardisation2", 
                                     label = ("include KDE standardisation"), 
                                     value=FALSE)
@@ -267,14 +267,14 @@ server <- function(input, output){
     
     if(input$checkbox.standardisation==TRUE){
       p2 <- sub_setkde() %>% 
-        ggplot(aes(x=DATE, y=l.standardisation)) +
-        geom_hline(yintercept=0.5, size=0.1) +
-        ylab(expression(Standardised~Kernel~home~range~(km^2))) +
-        scale_y_continuous(trans='log10', breaks=c(0.01,0.1, 1, 100, 10000, 100000), labels = plain, limits = c(0.0015, 300000))
-        #ggplot(aes(x=DATE, y=standardisation)) +
-        #geom_hline(yintercept=0.02, size=0.1) +
+        #ggplot(aes(x=DATE, y=l.standardisation)) +
+        #geom_hline(yintercept=0.5, size=0.1) +
         #ylab(expression(Standardised~Kernel~home~range~(km^2))) +
-        #scale_y_continuous(trans='log10', breaks=c(0.00001,0.0001, 0.001,0.1, 1, 100, 10000), labels = plain, limits = c(0.000016, 15000))
+        #scale_y_continuous(trans='log10', breaks=c(0.01,0.1, 1, 100, 10000, 100000), labels = plain, limits = c(0.0015, 300000))
+        ggplot(aes(x=DATE, y=standardisation)) +
+        geom_hline(yintercept=0.02, size=0.1) +
+        ylab(expression(Standardised~Kernel~home~range~(km^2))) +
+        scale_y_continuous(trans='log10', breaks=c(0.00001,0.0001, 0.001,0.1, 1, 100, 10000), labels = plain, limits = c(0.000016, 15000))
     } 
     else if(input$checkbox.standardisation==FALSE) {
       p2 <- sub_setkde() %>% ggplot(aes(x=DATE, y=AREA_KM2)) +
@@ -689,14 +689,14 @@ server <- function(input, output){
     
     if(input$checkbox.standardisation2==TRUE){
       p5 <- data.plot.All() %>% 
-        ggplot(aes(x=DATE, y=l.standardisation)) +
-        geom_hline(yintercept=1, size=0.1) +
-        ylab(expression(Standardised~Kernel~home~range~(km^2))) +
-        scale_y_continuous(trans='log10', breaks=c(0.01,0.1, 1, 100, 10000, 100000), labels = plain, limits = c(0.0015, 300000))
-        #ggplot(aes(x=DATE, y=standardisation)) +
-        #geom_hline(yintercept=0.02, size=0.1) +
-        #scale_y_continuous(trans='log10', breaks=c(0.00001,0.0001, 0.001,0.1, 1, 100, 10000), labels = plain, limits = c(0.000016, 15000)) +
-        #ylab(expression(Standardised~Kernel~home~range~(km^2)))
+        #ggplot(aes(x=DATE, y=l.standardisation)) +
+        #geom_hline(yintercept=1, size=0.1) +
+        #ylab(expression(Standardised~Kernel~home~range~(km^2))) +
+        #scale_y_continuous(trans='log10', breaks=c(0.01,0.1, 1, 100, 10000, 100000), labels = plain, limits = c(0.0015, 300000))
+        ggplot(aes(x=DATE, y=standardisation)) +
+        geom_hline(yintercept=0.02, size=0.1) +
+        scale_y_continuous(trans='log10', breaks=c(0.00001,0.0001, 0.001,0.1, 1, 100, 10000), labels = plain, limits = c(0.000016, 15000)) +
+        ylab(expression(Standardised~Kernel~home~range~(km^2)))
     }
     else {
       p5 <- data.plot.All() %>% ggplot(aes(x=DATE, y=AREA_KM2)) +
