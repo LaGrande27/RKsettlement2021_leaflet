@@ -361,7 +361,7 @@ server <- function(input, output){
           click[,c(2:4,6:7,11)] #keep only interesting rows, and only rows without factors
         }
       } 
-      else if(nrow(brush)>1) {
+      else if(nrow(brush)>0) {
         if(input$checkbox.standardisation==TRUE){
           brush <- brush[order(brush[,2] ), ] #order by START_DATE
           brush1 <- brush[, c(2:4,12,16,6:7,11)] #keep only interesting rows (for printing all rows in brush, not just min-max)
