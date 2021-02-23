@@ -192,7 +192,6 @@ ui <- fluidPage(
              fluidRow(
                column(width = 12, #class = "well",
                       h3("Non-migration, non-wintering GPS points"),
-                      h5("to test if exclusion of migration prior to standardisation factor calculation worked"),
                       leafletOutput("leaflet2", height = 500)
                )
              )
@@ -383,10 +382,12 @@ server <- function(input, output){
           print(brush1)
         }
       } 
-      else {print("click on or brush over the plot")}
+      else {cat("Click on, or brush over the plot.\nBrushed points will be highlighted in the map below.")
+        #print("click on or brush over the plot")
+        }
       })
   
-  
+
   
   ### --- Home range centers below threshold on a map --- ###
   
@@ -423,6 +424,16 @@ server <- function(input, output){
       setkde.all_sf[setkde.all_sf$ID == input$ID & setkde.all_sf$AREA_KM2 <= input$cutoff & setkde.all_sf$on.migration=="yes",]
     }
   })
+  
+  # highlight brushed points of ggplot above in the leaflet plot below
+  activePoint <- reactiveVal()   # Create a reactive value to store the country we seleect
+  observeEvent(input$plot_brush_Ind, {
+    near_Points <- brushedPoints(sub_setkde(), input$plot_brush_Ind)
+    activePoint(as.Date(near_Points[,2])) # Extract just the start date of point and assign it to activePoint()
+  })   # Update the value of activePoint() when we detect an input$plotClick event
+  highlightData <- reactive({
+    setkde.all_sf[setkde.all_sf$ID == input$ID & setkde.all_sf$START_DATE >= min(activePoint()) & setkde.all_sf$START_DATE <= max(activePoint()),]
+  })  # Use that data in the leaflet plot
   
   # plot of KDE centers with area below cutoff (km2) on zoomable map
   output$zoomplot <- renderLeaflet({
@@ -612,8 +623,19 @@ server <- function(input, output){
         primaryLengthUnit = "kilometers"
       )
     
-    l1
-    
+    if (length(activePoint()) > 0) { #points selected: highlight them in this leaflet plot
+      l1 %>% 
+        addCircleMarkers( #highlight the points selected in first graph
+          data=highlightData(),
+          radius = ~AREA_KM2+make.visible+7,
+          fillColor = "yellow",
+          fillOpacity = 0.75,         
+          stroke = F,
+          popup = ~ paste0(START_DATE, "<br>home range: ", AREA_KM2, " km<sup>2</sup><br>",
+                           settlement.year,"<br>GPS points: ", NR_POINTS)
+        )
+    } else {l1} # No country selected; regular plot
+
     # to make legend font size smaller
     #library(htmltools)
     #browsable(
