@@ -364,21 +364,23 @@ server <- function(input, output){
         if(input$checkbox.standardisation==TRUE){
           brush <- brush[order(brush[,2] ), ] #order by START_DATE
           brush1 <- brush[, c(2:4,12,16,6:7,11)] #keep only interesting rows (for printing all rows in brush, not just min-max)
+          row.names(brush1) <- c(1:nrow(brush))
           brush2 <- brush[, c(2:4,12,16,6:7)] #keep only interesting rows, and only rows without factors because of Min Max function
           Min <- summarize_all(brush2, min); row.names(Min) <- "min"
           Max <- summarize_all(brush2, max); row.names(Max) <- "max"
           minmax <- rbind(Min, Max)
-          print(minmax)
+          if(nrow(brush)>2) print(minmax)
           print(brush1)
         } 
         else if (input$checkbox.standardisation==FALSE){
           brush <- brush[order(brush[,2] ), ] #order by START_DATE
           brush1 <- brush[, c(2:4,6:7,11)] #keep only interesting rows (for printing all rows in brush, not just min-max)
+          row.names(brush1) <- c(1:nrow(brush))
           brush2 <- brush[, c(2:4,6:7)] #keep only interesting rows, and only rows without factors because of Min Max function
           Min <- summarize_all(brush2, min); row.names(Min) <- "min"
           Max <- summarize_all(brush2, max); row.names(Max) <- "max"
           minmax <- rbind(Min, Max)
-          print(minmax)
+          if(nrow(brush)>2) print(minmax)
           print(brush1)
         }
       } 
@@ -432,7 +434,7 @@ server <- function(input, output){
     activePoint(as.Date(near_Points[,2])) # Extract just the start date of point and assign it to activePoint()
   })   # Update the value of activePoint() when we detect an input$plotClick event
   highlightData <- reactive({
-    setkde.all_sf[setkde.all_sf$ID == input$ID & setkde.all_sf$START_DATE >= min(activePoint()) & setkde.all_sf$START_DATE <= max(activePoint()),]
+    setkde.all_sf[setkde.all_sf$ID == input$ID & setkde.all_sf$START_DATE %in% activePoint(),]
   })  # Use that data in the leaflet plot
   
   # plot of KDE centers with area below cutoff (km2) on zoomable map
