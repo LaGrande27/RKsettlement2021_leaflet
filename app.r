@@ -267,6 +267,8 @@ server <- function(input, output, session){
   output$plot.Individual <- renderPlot({
     
     if(input$checkbox.standardisation==TRUE){
+      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
+      
       p2 <- sub_setkde() %>% 
         #ggplot(aes(x=DATE, y=l.standardisation)) +
         #geom_hline(yintercept=0.5, size=0.1) +
@@ -278,6 +280,8 @@ server <- function(input, output, session){
         scale_y_continuous(trans='log10', breaks=c(0.00001,0.0001, 0.001,0.1, 1, 100, 10000), labels = plain, limits = c(0.000016, 15000))
     } 
     else if(input$checkbox.standardisation==FALSE) {
+      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
+      
       p2 <- sub_setkde() %>% ggplot(aes(x=DATE, y=AREA_KM2)) +
         geom_hline(yintercept=input$cutoff, size=0.1) +
         scale_y_continuous(trans='log10', breaks=c(0.1, 1, 100, 10000), labels = plain, limits = c(0.009, 1500000)) +
@@ -304,7 +308,9 @@ server <- function(input, output, session){
       scale_linetype_manual("", values = c("2020"="solid", "2019"="dashed", "2018"="dotted", "2017"="dotdash", "2016"="longdash", "2015"="dotted"))
     
     #for showing migration dates as grey/black outlines
-    if(input$checkbox==TRUE){ 
+    if(input$checkbox==TRUE){
+      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
+      
       p2 <- p2 +
         # function to use in ggplot for subsetting specific data
         #pick <- function(condition){ function(d) d %>% filter(!!enquo(condition)) }; geom_point(data=pick(on.migration=="yes"), col="grey", cex=0.95) +
@@ -318,6 +324,8 @@ server <- function(input, output, session){
     
     # change colouration
     if(input$colouration=="Longitude"){
+      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
+      
       p2.5 <- p2 +
         geom_point(aes(col=CENTER.LON_X, shape=YEAR), cex=0.9) +
         scale_alpha(range = c(0.4, 1)) +
@@ -325,12 +333,16 @@ server <- function(input, output, session){
         labs(col = "Longitude")
     } 
     else if(input$colouration == "Latitude"){
+      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
+      
       p2.5 <- p2 +
         geom_point(aes(col=CENTER.LAT_Y, shape=YEAR), cex=0.9) +
         viridis::scale_color_viridis(limits=c(min(setkde$CENTER.LAT_Y), max(setkde$CENTER.LAT_Y))) +
         labs(col = "Latitude")
     } 
     else if(input$colouration == "Settlement Year"){
+      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
+      
       p2.5 <- p2 +
         geom_point(aes(col=settlement.year,
                        shape=YEAR), cex=0.9) +
@@ -873,5 +885,3 @@ server <- function(input, output, session){
 ############### 3 - start shinyApp ##############
 
 shinyApp(ui = ui, server = server)
-
-
