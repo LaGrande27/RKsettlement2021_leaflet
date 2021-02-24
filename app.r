@@ -238,7 +238,7 @@ ui <- fluidPage(
 
 ############### 2 - server ###############
 
-server <- function(input, output){
+server <- function(input, output, session){
   dataInput <- reactive({input$AmountOfData})
   ### Panel 1 ----------------------------------------------------------------------------- ###
   
@@ -246,8 +246,10 @@ server <- function(input, output){
   # create a subset of data filtering for chosen bird.ID level(s)
   sub_setkde <- reactive({
     if(dataInput()==1){
+      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
       setkde[setkde$ID == input$ID,]
     } else if (dataInput()==2){
+      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
       setkde.all[setkde.all$ID == input$ID,]
     }
   })
@@ -370,7 +372,7 @@ server <- function(input, output){
           Max <- summarize_all(brush2, max); row.names(Max) <- "max"
           minmax <- rbind(Min, Max)
           if(nrow(brush)>2) print(minmax)
-          print(brush1)
+          if(nrow(brush)<21) print(brush1)
         } 
         else if (input$checkbox.standardisation==FALSE){
           brush <- brush[order(brush[,2] ), ] #order by START_DATE
@@ -381,7 +383,7 @@ server <- function(input, output){
           Max <- summarize_all(brush2, max); row.names(Max) <- "max"
           minmax <- rbind(Min, Max)
           if(nrow(brush)>2) print(minmax)
-          print(brush1)
+          if(nrow(brush)<21) print(brush1)
         }
       } 
       else {cat("Click on, or brush over the plot.\nBrushed points will be highlighted in the map below.")
@@ -871,4 +873,5 @@ server <- function(input, output){
 ############### 3 - start shinyApp ##############
 
 shinyApp(ui = ui, server = server)
+
 
