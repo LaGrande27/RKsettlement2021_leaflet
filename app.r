@@ -246,10 +246,8 @@ server <- function(input, output, session){
   # create a subset of data filtering for chosen bird.ID level(s)
   sub_setkde <- reactive({
     if(dataInput()==1){
-      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
       setkde[setkde$ID == input$ID,]
     } else if (dataInput()==2){
-      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
       setkde.all[setkde.all$ID == input$ID,]
     }
   })
@@ -265,10 +263,9 @@ server <- function(input, output, session){
   ### --- Home Range during the year --- ###
   # Plot of one tagged inidivual; Date vs. Home Range
   output$plot.Individual <- renderPlot({
+    session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
     
     if(input$checkbox.standardisation==TRUE){
-      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
-      
       p2 <- sub_setkde() %>% 
         #ggplot(aes(x=DATE, y=l.standardisation)) +
         #geom_hline(yintercept=0.5, size=0.1) +
@@ -280,8 +277,6 @@ server <- function(input, output, session){
         scale_y_continuous(trans='log10', breaks=c(0.00001,0.0001, 0.001,0.1, 1, 100, 10000), labels = plain, limits = c(0.000016, 15000))
     } 
     else if(input$checkbox.standardisation==FALSE) {
-      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
-      
       p2 <- sub_setkde() %>% ggplot(aes(x=DATE, y=AREA_KM2)) +
         geom_hline(yintercept=input$cutoff, size=0.1) +
         scale_y_continuous(trans='log10', breaks=c(0.1, 1, 100, 10000), labels = plain, limits = c(0.009, 1500000)) +
@@ -309,8 +304,6 @@ server <- function(input, output, session){
     
     #for showing migration dates as grey/black outlines
     if(input$checkbox==TRUE){
-      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
-      
       p2 <- p2 +
         # function to use in ggplot for subsetting specific data
         #pick <- function(condition){ function(d) d %>% filter(!!enquo(condition)) }; geom_point(data=pick(on.migration=="yes"), col="grey", cex=0.95) +
@@ -324,8 +317,6 @@ server <- function(input, output, session){
     
     # change colouration
     if(input$colouration=="Longitude"){
-      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
-      
       p2.5 <- p2 +
         geom_point(aes(col=CENTER.LON_X, shape=YEAR), cex=0.9) +
         scale_alpha(range = c(0.4, 1)) +
@@ -333,16 +324,12 @@ server <- function(input, output, session){
         labs(col = "Longitude")
     } 
     else if(input$colouration == "Latitude"){
-      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
-      
       p2.5 <- p2 +
         geom_point(aes(col=CENTER.LAT_Y, shape=YEAR), cex=0.9) +
         viridis::scale_color_viridis(limits=c(min(setkde$CENTER.LAT_Y), max(setkde$CENTER.LAT_Y))) +
         labs(col = "Latitude")
     } 
     else if(input$colouration == "Settlement Year"){
-      session$resetBrush("plot_brush_Ind") #to avoid that the blue box of brushed points stays when changing plots
-      
       p2.5 <- p2 +
         geom_point(aes(col=settlement.year,
                        shape=YEAR), cex=0.9) +
@@ -404,7 +391,6 @@ server <- function(input, output, session){
       })
   
 
-  
   ### --- Home range centers below threshold on a map --- ###
   
   # Create a subset of data filtering for chosen bird.ID level(s) for this type of data
@@ -442,10 +428,12 @@ server <- function(input, output, session){
   })
   
   # highlight brushed points of ggplot above in the leaflet plot below
-  activePoint <- reactiveVal()   # Create a reactive value to store the country we seleect
+  activePoint <- reactiveVal()   # Create a reactive value to store the point we select
   observeEvent(input$plot_brush_Ind, {
-    near_Points <- brushedPoints(sub_setkde(), input$plot_brush_Ind)
-    activePoint(as.Date(near_Points[,2])) # Extract just the start date of point and assign it to activePoint()
+    if(length(input$plot_brush_Ind)>0){
+      near_Points <- brushedPoints(sub_setkde(), input$plot_brush_Ind)
+      activePoint(as.Date(near_Points[,2])) # Extract just the start date of point and assign it to activePoint()
+    }
   })   # Update the value of activePoint() when we detect an input$plotClick event
   highlightData <- reactive({
     setkde.all_sf[setkde.all_sf$ID == input$ID & setkde.all_sf$START_DATE %in% activePoint(),]
@@ -639,7 +627,7 @@ server <- function(input, output, session){
         primaryLengthUnit = "kilometers"
       )
     
-    if (length(activePoint()) > 0) { #points selected: highlight them in this leaflet plot
+    if (length(input$plot_brush_Ind) > 0) { #points selected: highlight them in this leaflet plot
       l1 %>% 
         addCircleMarkers( #highlight the points selected in first graph
           data=highlightData(),
@@ -668,6 +656,7 @@ server <- function(input, output, session){
     #)
     
   })
+  
   
   
   
