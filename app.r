@@ -30,7 +30,7 @@ Sys.setlocale("LC_TIME", "C")  #set English hours for correct x-axis
 
 setkde <- read.table("KDEsettlers_per_5days_2ppd_standardisationFactor.csv", header=T, dec=".", sep=";")
 setkde.all <- read.table("KDE_AllSettlers_per_5days_2ppd_standardisationFactor.csv", header=T, dec=".", sep=";")
-settlers.nest <- read.table("list_of_nests_in2after_SettYear.csv", header=T, dec=".", sep=";")
+settlers.nest <- read.table("list_of_nests_in2after_SettYear_withSuccessInfo.csv", header=T, dec=".", sep=";")
 non.migration.settl.Points1 <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints_GITHUB1.csv", header=T, dec=".", sep=";")
 non.migration.settl.Points2 <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints_GITHUB2.csv", header=T, dec=".", sep=";")
 non.migration.settl.Points3 <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints_GITHUB3.csv", header=T, dec=".", sep=";")
