@@ -58,7 +58,7 @@ levels(setkde$settlement.year) <- list("3y before settling"="3y_prior_sett",
                                        "settlement year"="sett_year", 
                                        "1y after settling"="1y_after_sett",
                                        "2y after settling"="2y_after_sett",
-                                       "3y after settling")#, "<br>Color = ", color)
+                                       "3y after settling"="3y_after_sett")#, "<br>Color = ", color)
 setkde$julian <- julian(setkde$DATE, origin=as.Date("2020-01-01")) #as workaround for color legend
   #setkde$standardisation <- setkde$AREA_KM2/setkde$avg_dist2center
   #setkde$l.standardisation <- setkde$AREA_KM2/log(setkde$avg_dist2center)
