@@ -51,9 +51,12 @@ res1 <- lapply(list.setkde, function(setkde) {
   setkde$julian <- julian(setkde$DATE, origin=as.Date("2020-01-01")) #as workaround for color legend
   setkde
 })
-list2env(res1,.GlobalEnv) #this unnlists the listed dataframes and saves them under their original names !
+#list2env(res1,.GlobalEnv) #this unnlists the listed dataframes and saves them under their original names !
 setkde <- do.call(rbind, res1)
 setkde$window.length <- lapply(strsplit(row.names(setkde), "\\."), '[[', 1) %>% substr(., 7,7)
+setkde5 <- subset(setkde, window.length==5)
+setkde4 <- subset(setkde, window.length==4)
+setkde3 <- subset(setkde, window.length==3)
 
 list.setkde_sf <- list(setkde5_sf=setkde5,setkde4_sf=setkde4,setkde3_sf=setkde3)
 res2 <- lapply(list.setkde_sf, function(setkde) {
@@ -88,6 +91,9 @@ res.all1 <- lapply(list.setkde.all, function(setkde.all) {
 #list2env(res.all1,.GlobalEnv) #this unnlists the listed dataframes and saves them under their original names !
 setkde.all <- do.call(rbind, res.all1)
 setkde.all$window.length <- lapply(strsplit(row.names(setkde.all), "\\."), '[[', 1) %>% substr(., 7,7)
+setkde.all5 <- subset(setkde.all, window.length==5)
+setkde.all4 <- subset(setkde.all, window.length==4)
+setkde.all3 <- subset(setkde.all, window.length==3)
 
 list.setkde.all_sf <- list(setkde5.all_sf=setkde5.all, setkde4.all_sf=setkde4.all, setkde3.all_sf=setkde3.all)
 res.all2 <- lapply(list.setkde.all_sf, function(setkde.all) {
@@ -262,14 +268,14 @@ server <- function(input, output, session){
   # create a subset of data filtering for chosen bird.ID level(s)
   sub_setkde <- reactive({
     if(dataInput()==1){
-      if(WindowLengthInput()==3) {setkde[setkde$ID == input$ID & setkde$window.length == 5,]}
-      else if (WindowLengthInput()==2) {setkde[setkde$ID == input$ID & setkde$window.length == 4,]}
-      else if (WindowLengthInput()==1) {setkde[setkde$ID == input$ID & setkde$window.length == 3,]}
+      if(WindowLengthInput()==3) {setkde5[setkde5$ID == input$ID,]}
+      else if (WindowLengthInput()==2) {setkde4[setkde4$ID == input$ID,]}
+      else if (WindowLengthInput()==1) {setkde3[setkde3$ID == input$ID,]}
     }
     else if (dataInput()==2){
-      if(WindowLengthInput()==3) {setkde.all[setkde.all$ID == input$ID & setkde.all$window.length == 5,]}
-      else if (WindowLengthInput()==2) {setkde.all[setkde.all$ID == input$ID & setkde.all$window.length == 4,]}
-      else if (WindowLengthInput()==1) {setkde.all[setkde.all$ID == input$ID & setkde.all$window.length == 3,]}
+      if(WindowLengthInput()==3) {setkde5.all[setkde5.all$ID == input$ID,]}
+      else if (WindowLengthInput()==2) {setkde4.all[setkde4.all$ID == input$ID,]}
+      else if (WindowLengthInput()==1) {setkde3.all[setkde3.all$ID == input$ID,]}
     }
   })
   
@@ -860,3 +866,4 @@ server <- function(input, output, session){
 
 shinyApp(ui = ui, server = server)
 
+    
