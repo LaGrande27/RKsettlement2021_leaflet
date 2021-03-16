@@ -14,16 +14,6 @@ pacman::p_load(dplyr, # always
                leaflet, #map making
                sf, #transforming data into WGS84 coordinates
                htmltools) #if using browsable in leaflet to make legend size smaller
-# for the rest
-pacman::p_load(sp, #for SpatialPoints()
-               adehabitatHR, #for Kernel Density Estimation
-               parallel, #for using more than 1 core
-               tidyr, #for using gather(), rearranging data
-               stringr, #for using str_sub()
-               geosphere #for function distm() in standardisation factor step
-               #stringi, #for stri_length function
-               #XML
-               )  
 
 options(scipen = 999) #R avoids scientific style of numbers (options(scipen=0) reset to default)
 
@@ -34,61 +24,76 @@ Sys.setlocale("LC_TIME", "C")  #set English hours for correct x-axis
 ############### make a shiny app ################
 #################################################-------------------------------------------------
 
-
 settlers <- read.table("Settlers_list_Lara_all.csv", header=T, dec=".", sep=";")
-setkde <- read.table("KDE_AllSettlers_per_5days_2ppd_m_allbirds_relYears.csv", header=T, dec=".", sep=";")
-setkde.all <- read.table("KDE_AllSettlers_per_5days_2ppd_m_allbirds.csv", header=T, dec=".", sep=";")
+setkde5 <- read.table("KDE_AllSettlers_per_5days_2ppd_m_allbirds_relYears.csv", header=T, dec=".", sep=";") #only relevant years
+setkde5.all <- read.table("KDE_AllSettlers_per_5days_2ppd_m_allbirds.csv", header=T, dec=".", sep=";")
+setkde4 <- read.table("KDE_AllSettlers_per_4days_2ppd_m_allbirds_relYears.csv", header=T, dec=".", sep=";") #only relevant years
+setkde4.all <- read.table("KDE_AllSettlers_per_4days_2ppd_m_allbirds.csv", header=T, dec=".", sep=";")
+setkde3 <- read.table("KDE_AllSettlers_per_3days_2ppd_m_allbirds_relYears.csv", header=T, dec=".", sep=";") #only relevant years
+setkde3.all <- read.table("KDE_AllSettlers_per_3days_2ppd_m_allbirds.csv", header=T, dec=".", sep=";")
 settlers.nest <- read.table("list_of_nests_in2after_SettYear_allbirds.csv", header=T, dec=".", sep=";")
-non.migration.settl.Points1 <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints_GITHUB1.csv", header=T, dec=".", sep=";")
-non.migration.settl.Points2 <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints_GITHUB2.csv", header=T, dec=".", sep=";")
-non.migration.settl.Points3 <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints_GITHUB3.csv", header=T, dec=".", sep=";")
-non.migration.settl.Points4 <- read.table("AllSettlers_nonMigrating_nonWinter_GPSpoints_GITHUB4.csv", header=T, dec=".", sep=";")
-non.migration.settl.Points <- rbind(non.migration.settl.Points1, non.migration.settl.Points2, non.migration.settl.Points3, non.migration.settl.Points4)
 locations <- read.table("Settlement_Potatoes_Locations.csv", header=T, dec=".", sep=";")
 
-
 # dataset: setkde ----------------------------------------------------
-setkde$START_DATE <- as.Date(setkde$START_DATE, format="%Y-%m-%d")
-setkde$DATE <- as.Date(paste0("2020-", substr(setkde$START_DATE, 6, 10)))  # reformat x axis display to include 29th February
-setkde$YEAR <- substr(setkde$START_DATE, 1, 4)
-setkde$YEAR <- factor(setkde$YEAR, levels=c("2015","2016","2017","2018","2019","2020","2021"))
-levels(setkde$settlement.year) <- list("3y before settling"="3y_prior_sett",
-                                       "2y before settling"="2y_prior_sett",
-                                       "1y before settling"="1y_prior_sett",
-                                       "settlement year"="sett_year", 
-                                       "1y after settling"="1y_after_sett",
-                                       "2y after settling"="2y_after_sett",
-                                       "3y after settling"="3y_after_sett")#, "<br>Color = ", color)
-setkde$julian <- julian(setkde$DATE, origin=as.Date("2020-01-01")) #as workaround for color legend
-  #setkde$standardisation <- setkde$AREA_KM2/setkde$avg_dist2center
-  #setkde$l.standardisation <- setkde$AREA_KM2/log(setkde$avg_dist2center)
-#turn into sf object with WGS84 coordinates. Doesn't change the x & y values, since those are already
-#in longitude & latitude, but it might help with the scale bar etc.
-setkde_sf <- setkde %>% 
-  st_as_sf(coords=c("CENTER.LON_X","CENTER.LAT_Y")) %>% 
-  st_set_crs(4326) #this uses WGS84 projected (expected by leaflet)
+list.setkde <- list(setkde5=setkde5, setkde4=setkde4, setkde3=setkde3)
+res1 <- lapply(list.setkde, function(setkde) {
+  setkde$START_DATE <- as.Date(setkde$START_DATE, format="%Y-%m-%d")
+  setkde$DATE <- as.Date(paste0("2020-", substr(setkde$START_DATE, 6, 10)))  # reformat x axis display to include 29th February
+  setkde$YEAR <- substr(setkde$START_DATE, 1, 4)
+  setkde$YEAR <- factor(setkde$YEAR, levels=c("2015","2016","2017","2018","2019","2020","2021"))
+  levels(setkde$settlement.year) <- list("3y before settling"="3y_prior_sett",
+                                         "2y before settling"="2y_prior_sett",
+                                         "1y before settling"="1y_prior_sett",
+                                         "settlement year"="sett_year", 
+                                         "1y after settling"="1y_after_sett",
+                                         "2y after settling"="2y_after_sett",
+                                         "3y after settling"="3y_after_sett")#, "<br>Color = ", color)
+  setkde$julian <- julian(setkde$DATE, origin=as.Date("2020-01-01")) #as workaround for color legend
+  setkde
+})
+list2env(res1,.GlobalEnv) #this unnlists the listed dataframes and saves them under their original names !
+
+list.setkde_sf <- list(setkde5_sf=setkde5,setkde4_sf=setkde4,setkde3_sf=setkde3)
+res2 <- lapply(list.setkde_sf, function(setkde) {
+  setkde_sf <- setkde %>% 
+    st_as_sf(coords=c("CENTER.LON_X","CENTER.LAT_Y")) %>% 
+    st_set_crs(4326) #this uses WGS84 projected (expected by leaflet)
+  setkde_sf
+})
+setkde_sf <- do.call(rbind, res2)
+setkde_sf$window.length <- lapply(strsplit(row.names(setkde_sf), "\\."), '[[', 1) %>% substr(., 7,7)
 
 
 # dataset: setkde.all ----------------------------------------------------
-setkde.all$START_DATE <- as.Date(setkde.all$START_DATE, format="%Y-%m-%d")
-setkde.all$DATE <- as.Date(paste0("2020-", substr(setkde.all$START_DATE, 6, 10)))  # reformat x axis display to include 29th February
-setkde.all$YEAR <- substr(setkde.all$START_DATE, 1, 4)
-setkde.all$YEAR <- factor(setkde.all$YEAR, levels=c("2015","2016","2017","2018","2019","2020","2021"))
-levels(setkde.all$settlement.year) <- list("5y before settling"="5y_prior_sett",
-                                           "4y before settling"="4y_prior_sett",
-                                           "3y before settling"="3y_prior_sett",
-                                           "2y before settling"="2y_prior_sett",
-                                           "1y before settling"="1y_prior_sett",
-                                           "settlement year"="sett_year", 
-                                           "1y after settling"="1y_after_sett",
-                                           "2y after settling"="2y_after_sett",
-                                           "3y after settling"="3y_after_sett")
-setkde.all$julian <- julian(setkde.all$DATE, origin=as.Date("2020-01-01")) #as workaround for color legend
-  #setkde.all$standardisation <- setkde.all$AREA_KM2/setkde.all$avg_dist2center
-#turn into sf object with WGS84 coordinates. 
-setkde.all_sf <- setkde.all %>% 
-  st_as_sf(coords=c("CENTER.LON_X","CENTER.LAT_Y")) %>% 
-  st_set_crs(4326) #this uses WGS84 projected (expected by leaflet)
+list.setkde.all <- list(setkde5.all=setkde5.all, setkde4.all=setkde4.all, setkde3.all=setkde3.all)
+res.all1 <- lapply(list.setkde.all, function(setkde.all) {
+  setkde.all$START_DATE <- as.Date(setkde.all$START_DATE, format="%Y-%m-%d")
+  setkde.all$DATE <- as.Date(paste0("2020-", substr(setkde.all$START_DATE, 6, 10)))  # reformat x axis display to include 29th February
+  setkde.all$YEAR <- substr(setkde.all$START_DATE, 1, 4)
+  setkde.all$YEAR <- factor(setkde.all$YEAR, levels=c("2015","2016","2017","2018","2019","2020","2021"))
+  levels(setkde.all$settlement.year) <- list("5y before settling"="5y_prior_sett",
+                                             "4y before settling"="4y_prior_sett",
+                                             "3y before settling"="3y_prior_sett",
+                                             "2y before settling"="2y_prior_sett",
+                                             "1y before settling"="1y_prior_sett",
+                                             "settlement year"="sett_year", 
+                                             "1y after settling"="1y_after_sett",
+                                             "2y after settling"="2y_after_sett",
+                                             "3y after settling"="3y_after_sett")
+  setkde.all$julian <- julian(setkde.all$DATE, origin=as.Date("2020-01-01")) #as workaround for color legend
+  setkde.all
+})
+list2env(res.all1,.GlobalEnv) #this unnlists the listed dataframes and saves them under their original names !
+
+list.setkde.all_sf <- list(setkde5.all_sf=setkde5.all, setkde4.all_sf=setkde4.all, setkde3.all_sf=setkde3.all)
+res.all2 <- lapply(list.setkde.all_sf, function(setkde.all) {
+  setkde.all_sf <- setkde.all %>% 
+    st_as_sf(coords=c("CENTER.LON_X","CENTER.LAT_Y")) %>% 
+    st_set_crs(4326) #this uses WGS84 projected (expected by leaflet)
+  setkde.all_sf
+})
+setkde.all_sf <- do.call(rbind, res.all2)
+setkde.all_sf$window.length <- lapply(strsplit(row.names(setkde.all_sf), "\\."), '[[', 1) %>% substr(., 7,7)
 
 
 #dataset: settlers.nest ----------------------------------------------------
@@ -98,15 +103,7 @@ settlers.nest_sf <- settlers.nest %>%
   st_set_crs(4326) #this uses WGS84 (expected by leaflet)
 
 
-#dataset: non.migration.settl.Points ---------------------------------------
-non.migration.settl.Points$julian <- julian(as.Date(non.migration.settl.Points$DATE), origin=as.Date("2015-01-01")) #as workaround for color legend
-non.migration.settl.Points_sf <- non.migration.settl.Points %>% 
-  st_as_sf(coords=c("LON","LAT")) %>% 
-  st_set_crs(4326) #this uses WGS84 (expected by leaflet)
-# for leaflet plot 2; the visualisation of all non-Spain/France-wintering, non-migration GPS points
-
-
-#dataset: non.migration.settl.Points ---------------------------------------
+#dataset: locations of Settlement + Potatoes ---------------------------------------
 locations$type <- sub("\\_.*", "", locations$Type) %>% as.factor
 locations$cutoff <- str_sub(locations$Type,-1,-1) %>% as.numeric
 settlement_loc <- locations %>% filter(!is.na(LON)) %>%
@@ -130,7 +127,7 @@ plain <- function(x,...) format(x, ..., scientific = FALSE, drop0trailing = TRUE
 
 ui <- fluidPage(
   navbarPage(
- #tabsetPanel(
+    #tabsetPanel(
     "5 day-window Kernel home ranges",
     # Two tabs, one for a specific individual, the other as overview of home range development for all kites
     tabPanel("Individuals",
@@ -141,26 +138,26 @@ ui <- fluidPage(
                # Build selection tool for changing the individual to be displayed
                column(5,
                       wellPanel(
-                        selectInput(inputId = "ID", label = "Red Kite", choices = unique(setkde$ID),
+                        selectInput(inputId = "ID", label = "Red Kite", choices = unique(settlers$TransmGSM),
                                     selected = "KISW01", multiple = F))
-                      ),
+               ),
                # Change amount of data displayed
                column(3,
                       radioButtons(inputId = "AmountOfData",
                                    label = "Data",
-                                   choices = list("Only relevant years" = 1,
+                                   choices = list("Relevant years" = 1,
                                                   "All years" = 2),
                                    selected = 1)
                ),
                # Change cutoff/threshold value of home range. Only home ranges below that value will be considered for settlements and potatoes
                column(4,
-                     sliderInput(inputId = "cutoff",
-                                label = "Max. home range size for map display",
-                               min = 3,
-                              max = 50,
-                             step = 1,
-                            value = 6)
-                     )
+                      sliderInput(inputId = "cutoff",
+                                  label = "Max. home range size for map display",
+                                  min = 3,
+                                  max = 50,
+                                  step = 1,
+                                  value = 6)
+               )
              ),
              
              # Displaying outputs
@@ -173,12 +170,23 @@ ui <- fluidPage(
              # Sidebar layout with input and output definitions
              fluidRow(
                column(3,
+                      # Change the moving window length
                       wellPanel(
                         h5("Outline migration dates"),
                         checkboxInput(inputId = "checkbox", 
                                       label = HTML("grey contour = on migration,<br />black outline = departure/arrival day with sufficient data"), 
                                       value=TRUE)
-                      )),
+                      ),
+                      # show migration dates
+                      wellPanel(
+                        radioButtons(inputId = "MovingWindowLength",
+                                     label = "Moving Window Length",
+                                     choices = list("3 days" = 1,
+                                                    "4 days" = 2,
+                                                    "5 days" = 3),
+                                     selected = 3)
+                      )
+               ),
                column(9,
                       plotOutput(outputId = "plot.Individual",
                                  width = "auto", height = "350", 
@@ -201,42 +209,29 @@ ui <- fluidPage(
              fluidRow(
                column(width = 12, #class = "well",
                       h3("Map of home ranges below threshold"),
-                      leafletOutput("zoomplot", height = 500)
-               )
-             ),
-             #Leaflet with (all) gps point
-             fluidRow(
-               column(width = 12, #class = "well",
-                      h3("Non-migrating, non-wintering GPS points"),
-                      leafletOutput("leaflet2", height = 500)
+                      leafletOutput("zoomplot", height = 550)
                )
              )
     ),
     tabPanel("All Red Kites",
              fluidRow(
-               column(5,
+               column(6,
                       wellPanel(
                         selectInput(inputId = "colouration.All", label=h5("Colour coding"), choices = c("Longitude"="Longitude",
                                                                                                         "Latitude"="Latitude",
                                                                                                         "Settlement Year"="Settlement Year"),
                                     selected = "Settlement Year", multiple = F)
-                        )
-                      ),
-               column(4,
+                      )
+               ),
+               column(6,
                       wellPanel(
                         h5("Data Confidence"),
                         checkboxInput(inputId = "datasecurity",
                                       label=HTML("Highlight days with<br /><30 points (medium size, semi-transparent)<br />or <20 points (big, opaque)<br />for entire moving window length"),
                                       value = F)
-                        )
-                      ),
-               column(3,
-                      h5("Data Standardisation"),
-                      checkboxInput(inputId = "checkbox.standardisation2", 
-                                    label = ("include KDE standardisation"), 
-                                    value=FALSE)
                       )
-               ),
+               )
+             ),
              fluidRow(
                column(12,
                       plotOutput(outputId = "plot.All",
@@ -245,9 +240,9 @@ ui <- fluidPage(
                                  brush = "plot_brush_All"),
                       
                       #htmlOutput("info.All")
-                      )
                )
              )
+    )
   )
 )
 
@@ -256,23 +251,29 @@ ui <- fluidPage(
 
 server <- function(input, output, session){
   dataInput <- reactive({input$AmountOfData})
+  WindowLengthInput <- reactive({input$MovingWindowLength})
   ### Panel 1 ----------------------------------------------------------------------------- ###
   
   # Depending on the type of data chosen, 
   # create a subset of data filtering for chosen bird.ID level(s)
   sub_setkde <- reactive({
     if(dataInput()==1){
-      setkde[setkde$ID == input$ID,]
-    } else if (dataInput()==2){
-      setkde.all[setkde.all$ID == input$ID,]
+      if(WindowLengthInput()==3) {setkde5[setkde5$ID == input$ID,]}
+      else if (WindowLengthInput()==2) {setkde4[setkde4$ID == input$ID,]}
+      else if (WindowLengthInput()==1) {setkde3[setkde3$ID == input$ID,]}
+    }
+    else if (dataInput()==2){
+      if(WindowLengthInput()==3) {setkde5.all[setkde5.all$ID == input$ID,]}
+      else if (WindowLengthInput()==2) {setkde4.all[setkde4.all$ID == input$ID,]}
+      else if (WindowLengthInput()==1) {setkde3.all[setkde3.all$ID == input$ID,]}
     }
   })
-
+  
   # different KDE cutoff for red kite breeding in Czech Republic (still activated for All kites plot)
   offset <- reactive({
     if (input$cutoff >15) {6} else {1.2}
   }) #this regulates how far away the text annotation is away from the geom_line
-
+  
   # insert warning if necessary to observe 2021, or if settlement debatable
   settlerinfo <- reactive({
     settlers[settlers$TransmGSM == input$ID,]
@@ -344,27 +345,28 @@ server <- function(input, output, session){
   
   # Find date and home range when clicking on/hovering over/brushing at points in plots
   output$plot.Ind.click_brush <- renderPrint({
-      click <- nearPoints(sub_setkde(), input$plot_click_Ind, threshold=2, addDist = F) #showing points near click
-      brush <- brushedPoints(sub_setkde(), input$plot_brush_Ind) #showing points near brush
-      if(nrow(click)>0) {
-        click <- click[order(click[,2] ), ] #order by START_DATE
-        click[,c(2:4,6:7,11)] #keep only interesting rows, and only rows without factors
-      } 
-      else if(nrow(brush)>0) {
-        brush <- brush[order(brush[,2] ), ] #order by START_DATE
-        brush1 <- brush[, c(2:4,6:7,11)] #keep only interesting rows (for printing all rows in brush, not just min-max)
-        row.names(brush1) <- c(1:nrow(brush))
-        brush2 <- brush[, c(2:4,6:7)] #keep only interesting rows, and only rows without factors because of Min Max function
-        Min <- summarize_all(brush2, min); row.names(Min) <- "min"
-        Max <- summarize_all(brush2, max); row.names(Max) <- "max"
-        minmax <- rbind(Min, Max)
-        if(nrow(brush)>2) print(minmax)
-        if(nrow(brush)<21) print(brush1)
-      } 
-      else {cat("Click on, or brush over the plot.\nBrushed points will be highlighted in the map below.")}
-      })
+    click <- nearPoints(sub_setkde(), input$plot_click_Ind, threshold=2, addDist = F) #showing points near click
+    brush <- brushedPoints(sub_setkde(), input$plot_brush_Ind) #showing points near brush
+    if(nrow(click)>0) {
+      click <- click[order(click[,2] ), ] #order by START_DATE
+      click[,c(2:4,6:7,11)] #keep only interesting rows, and only rows without factors
+    } 
+    else if(nrow(brush)>0) {
+      brush <- brush[order(brush[,2] ), ] #order by START_DATE
+      brush1 <- brush[, c(2:4,6:7,11)] #keep only interesting rows (for printing all rows in brush, not just min-max)
+      row.names(brush1) <- c(1:nrow(brush))
+      brush2 <- brush[, c(2:4,6:7)] #keep only interesting rows, and only rows without factors because of Min Max function
+      Min <- summarize_all(brush2, min); row.names(Min) <- "min"
+      Max <- summarize_all(brush2, max); row.names(Max) <- "max"
+      minmax <- rbind(Min, Max)
+      if(nrow(brush)>2) print(minmax)
+      if(nrow(brush)<21) print(brush1)
+    } 
+    else {cat("Click on, or brush over the plot.\nBrushed points will be highlighted in the map below.")}
+  })
   
-
+  
+  
   ### --- Home range centers below threshold on a map --- ###
   
   # Create a subset of data filtering for chosen bird.ID level(s) for this type of data
@@ -405,7 +407,14 @@ server <- function(input, output, session){
   sub.sepo_loc <- reactive({
     settlement_loc[settlement_loc$TransmGSM == input$ID,]
   })
-
+  
+  # determining subset based on window length 
+  windowlength <- reactive ({
+    if(input$MovingWindowLength == 1) {3}
+    else if(input$MovingWindowLength == 2) {4}
+    else if(input$MovingWindowLength == 3) {5}
+  })
+  
   # highlight brushed points of ggplot above in the leaflet plot below
   activePoint <- reactiveVal()   # Create a reactive value to store the point we select
   observeEvent(input$plot_brush_Ind, {
@@ -415,7 +424,7 @@ server <- function(input, output, session){
     }
   })   # Update the value of activePoint() when we detect an input$plotClick event
   highlightData <- reactive({
-    setkde.all_sf[setkde.all_sf$ID == input$ID & setkde.all_sf$START_DATE %in% activePoint(),]
+    setkde.all_sf[setkde.all_sf$ID == input$ID & setkde.all_sf$window.length == windowlength() & setkde.all_sf$START_DATE %in% activePoint(),]
   })  # Use that data in the leaflet plot
   
   # plot of KDE centers with area below cutoff (km2) on zoomable map
@@ -443,7 +452,7 @@ server <- function(input, output, session){
                    'red', 'gray', 'blue','cyan','orange','#CC0066')
     } 
     else { # display all years
-    #  ### make colour palette for Date and Year -----------------------------------------------
+      #  ### make colour palette for Date and Year -----------------------------------------------
       pal.year <- colorFactor(palette = c('#CC00CC', '#9900CC', '#440154FF', '#39568CFF', '#1F968BFF', '#73D055FF', '#FDE725FF', 'orange', 'chocolate'), domain = NULL)
       
       ### legend for settlement.year, on.migration and nest location ### ----------------------
@@ -466,12 +475,12 @@ server <- function(input, output, session){
         shapes <- gsub("circle", "100%", shapes)
         paste0(colors, "; width:", sizes, "px; margin-top:",margin.top,"px;margin-left:",margin.left,
                "px;height:", sizes, "px; border:3px solid ", borders, "; border-radius:", shapes)
-        }
+      }
       make_labels <- function(sizes, labels) {
         paste0("<div style='display: inline-block;font-size: 10px;height: ", 
                sizes, "px;margin-top: 0px;line-height: ", 
                sizes, "px;'>", labels, "</div>")
-        }
+      }
       legend_colors <- make_shapes(sizes, borders, shapes)
       legend_labels <- make_labels(sizes, labels)
       
@@ -495,12 +504,12 @@ server <- function(input, output, session){
         paste0(colors.Size, "; width:", sizes.Size, "px; margin-top:",margin.top.Size,"px;margin-left:",
                margin.left.Size,"px;height:", sizes.Size, "px; border:2px solid ", 
                borders.Size, "; border-radius:", shapes)
-        }
+      }
       make_labels <- function(sizes.Size, labels.Size) {
         paste0("<div style='display: inline-block;font-size: 10px;height: ", 
                sizes.Size, "px;margin-top: 0px;line-height: ", 
                sizes.Size, "px;'>", labels.Size, " km<sup>2</sup>  KDE</div>")
-        }
+      }
       legend_colors <- make_shapes(sizes.Size, borders.Size, shapes)
       legend_labels <- make_labels(sizes.Size, labels.Size)
       
@@ -528,17 +537,18 @@ server <- function(input, output, session){
         }"
       ) %>%
       addProviderTiles(providers$OpenTopoMap,
-                       options = providerTileOptions(opacity = 0.7)) %>%  #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
-      addMapPane("nest", zIndex = 430 #puts nest on top of all layers
+                       options = providerTileOptions(opacity = 0.7) #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
       ) %>%  
-      addMapPane("settlements", zIndex = 431 #puts nest on top of all layers
+      addMapPane("nest", zIndex = 430 #puts nest on near-top of all layers
+      ) %>%  
+      addMapPane("settlements", zIndex = 431 #puts settlements on top of all layers
       ) %>%  
       ## -- SETTLEMENT CENTERS -- ##
       addCircleMarkers(
         data=sub.sepo_loc(),
         radius = ~(cutoff/2),
         color = ~pal.sepo(type),
-        group = "add settlement and potoatoes",
+        group = "settlement and potatoes",
         stroke = FALSE, fillOpacity = ~7/cutoff,
         options = pathOptions(pane = "settlements"),
         popup = ~ paste0(type," potato<br>cutoff: ", cutoff, " km<sup>2</sup><br>", Start," - ", End)
@@ -547,15 +557,15 @@ server <- function(input, output, session){
         data=sub.sepo_loc(),
         radius = 1500,
         color = "black",
-        group = "add settlement and potoatoes",
+        group = "settlement and potatoes",
         weight=1,
         stroke = TRUE, fill=F,
         options = pathOptions(pane = "settlements")
       ) %>% 
       ## -- KDE CENTERS -- ##
       addCircleMarkers( #date colour-coded centers of home ranges
-        data=sub_setkde_cutoff(), #lng=~CENTER.LON_X, lat=~CENTER.LAT_Y
-        group = "home range points",
+        data=subset(sub_setkde_cutoff(), window.length==3), #lng=~CENTER.LON_X, lat=~CENTER.LAT_Y
+        group = "3 day-window",
         clusterOptions = markerClusterOptions(maxClusterRadius = 10,
                                               disableClusteringAtZoom=11),
         radius = ~AREA_KM2+make.visible,
@@ -565,24 +575,65 @@ server <- function(input, output, session){
         popup = ~ paste0(START_DATE,"<br>home range: ", AREA_KM2, " km<sup>2</sup><br>",
                          settlement.year,"<br>GPS points: ", NR_POINTS)
       ) %>%
+      addCircleMarkers( #date colour-coded centers of home ranges
+        data=subset(sub_setkde_cutoff(), window.length==4), #lng=~CENTER.LON_X, lat=~CENTER.LAT_Y
+        group = "4 day-window",
+        clusterOptions = markerClusterOptions(maxClusterRadius = 10,
+                                              disableClusteringAtZoom=11),
+        radius = ~AREA_KM2+make.visible,
+        color = ~pal.year(settlement.year),  #border: year
+        fillColor = ~pal.date(julian), fillOpacity = 1,         #inside: date in the year
+        stroke = TRUE, opacity = 1, weight = ~(0.05*AREA_KM2+1.5),
+        popup = ~ paste0(START_DATE,"<br>home range: ", AREA_KM2, " km<sup>2</sup><br>",
+                         settlement.year,"<br>GPS points: ", NR_POINTS)
+      ) %>%
+      addCircleMarkers( #date colour-coded centers of home ranges
+        data=subset(sub_setkde_cutoff(), window.length==5), #lng=~CENTER.LON_X, lat=~CENTER.LAT_Y
+        group = "5 day-window",
+        clusterOptions = markerClusterOptions(maxClusterRadius = 10,
+                                              disableClusteringAtZoom=11),
+        radius = ~AREA_KM2+make.visible,
+        color = ~pal.year(settlement.year),  #border: year
+        fillColor = ~pal.date(julian), fillOpacity = 1,         #inside: date in the year
+        stroke = TRUE, opacity = 1, weight = ~(0.05*AREA_KM2+1.5),
+        popup = ~ paste0(START_DATE,"<br>home range: ", AREA_KM2, " km<sup>2</sup><br>",
+                         settlement.year,"<br>GPS points: ", NR_POINTS)
+      ) %>%
+      ## -- MIGRATION points underneath KDE CENTERS -- ##
       addCircleMarkers( #indicator for migration dates (#grey circles)
-        data=sub_setkde_cutoff.m(),
-        group = "home range points",
+        data=subset(sub_setkde_cutoff.m(), window.length==3),
+        group = "3 day-window",
+        radius = ~(1.05*AREA_KM2+3),
+        color = "gray",
+        stroke = T, fill = F,
+        opacity = 1
+      ) %>%
+      addCircleMarkers( #indicator for migration dates (#grey circles)
+        data=subset(sub_setkde_cutoff.m(), window.length==4),
+        group = "4 day-window",
+        radius = ~(1.05*AREA_KM2+3),
+        color = "gray",
+        stroke = T, fill = F,
+        opacity = 1
+      ) %>%
+      addCircleMarkers( #indicator for migration dates (#grey circles)
+        data=subset(sub_setkde_cutoff.m(), window.length==5),
+        group = "5 day-window",
         radius = ~(1.05*AREA_KM2+3),
         color = "gray",
         stroke = T, fill = F,
         opacity = 1
       ) %>%
       ## -- NEST points -- ##
-      addCircleMarkers( #add nest for when only nest of settlement year should be displayed (as controlled by addLayersControl)
-        data=sub_setkde_nest.set(), #lng=~nest.x, lat=~nest.y,
-        radius = 3,
-        group = "nest of settlement year",
-        color = "red",
-        stroke = FALSE, fillOpacity = 1,
-        options = pathOptions(pane = "nest"),
-        popup = ~ paste0("nest: ",settlement.year,"<br>",YEAR)
-      )  %>% 
+      #addCircleMarkers( #add nest for when only nest of settlement year should be displayed (as controlled by addLayersControl)
+      #  data=sub_setkde_nest.set(), #lng=~nest.x, lat=~nest.y,
+      #  radius = 3,
+      #  group = "nest of settlement year",
+      #  color = "red",
+      #  stroke = FALSE, fillOpacity = 1,
+      #  options = pathOptions(pane = "nest"),
+      #  popup = ~ paste0("nest: ",settlement.year,"<br>",YEAR)
+      #)  %>% 
       addCircleMarkers( #add nests for when nests of all years should be displayed (as controlled by addLayersControl)
         data=sub_setkde_nest.all(),
         radius = 3,
@@ -594,23 +645,16 @@ server <- function(input, output, session){
       )  %>% 
       addCircleMarkers( # coloured border around point as indicator for year 
         data=sub_setkde_nest.all(),
-        radius = ~3,
+        radius = 3,
         group = "nests of all years",
         color = ~pal.nest(settlement.year),
         stroke = T, fill = F,
         opacity = 1
       ) %>%
-      #addCircles( #add radius of 1.5 km around nest of settlement year
-      #  data=sub_setkde_nest.set(),
-      #  radius = 1500,
-      #  color = "black",
-      #  weight=1,
-      #  stroke = TRUE, fill=F
-         #) %>%
       ## -- CONTROLS -- ##
       addLayersControl( #control to define which nests are displayed
-        baseGroups = c("nest of settlement year", "nests of all years"),
-        overlayGroups = c("home range points", "add settlement and potoatoes"), #control to define if settlements & potoatoes are displayed
+        baseGroups = c("3 day-window", "4 day-window", "5 day-window"),
+        overlayGroups = c("home range points", "settlement and potatoes"), #control to define if settlements & potoatoes are displayed
         options = layersControlOptions(collapsed = F),
         position = "topleft"
       ) %>% 
@@ -647,85 +691,32 @@ server <- function(input, output, session){
     } else {l1} # No points selected; regular plot
   })
   
-  
-  
-  
-  ### --- Home range centers below threshold on a map --- ###
-  sub_nms_sf <- reactive({
-    non.migration.settl.Points_sf[non.migration.settl.Points_sf$NAME == input$ID,]
-  }) #
-  
-  # plot of all non-migration, non-wintering GPS points on zoomable map
-  output$leaflet2 <- renderLeaflet({
-    
-    pal.NMS <- colorNumeric(palette = viridis(400), domain = range(sub_nms_sf()$julian), reverse=T) #color legend for date (workaround with julian dates to have numeric values)
-    
-    myLabelFormat2 = function(...,dates=FALSE){ 
-      if(dates){ 
-        function(type = "numeric", cuts){
-          as <- as.Date(cuts, origin="2015-01-01")#, format="%b-%d")
-          format(as,"%m-%Y")
-          #div(style="font-size: 10px;", month)
-        } 
-      }else{
-        labelFormat(...)
-      }
-    }
-    
-    leaflet() %>%
-      addProviderTiles(providers$OpenTopoMap,
-                       options = providerTileOptions(opacity = 0.7)) %>%  #Esri.WorldTopoMap #Stamen.Terrain #OpenTopoMap #Esri.WorldImagery
-      addCircleMarkers( #date colour-coded centers of home ranges
-        data = sub_nms_sf(),
-        radius = 4,
-        color = ~pal.NMS(julian),
-        popup = ~ paste0(TIME),
-        stroke = F,
-        fillOpacity = 0.65
-        ) %>%
-      addLegend(
-        data = sub_nms_sf(),
-        position = "bottomright", 
-        pal = pal.NMS,
-        values = ~julian,
-        opacity = 1,
-        bins=6,
-        labFormat = myLabelFormat2(dates=T),
-        title = NULL
-      )
-  })
 
+  
   
   ### Panel 2 ----------------------------------------------------------------------------- ###
   # Plot for all Individuals
   data.plot.All <- reactive({
-    if(dataInput()==1) {setkde} else if (dataInput()==2) {setkde.all}
+    if(dataInput()==1) {
+      if(WindowLengthInput()==1) {setkde5}
+      else if (WindowLengthInput()==2) {setkde4}
+      else if (WindowLengthInput()==3) {setkde3}
+    }
+    else if (dataInput()==2) {
+      if(WindowLengthInput()==1) {setkde5.all}
+      else if (WindowLengthInput()==2) {setkde4.all}
+      else if (WindowLengthInput()==3) {setkde3.all}
+    }
   })
   
   output$plot.All <- renderPlot({
     
-    if(input$checkbox.standardisation2==TRUE){
-      p5 <- data.plot.All() %>% 
-        #ggplot(aes(x=DATE, y=l.standardisation)) +
-        #geom_hline(yintercept=1, size=0.1) +
-        #ylab(expression(Standardised~Kernel~home~range~(km^2))) +
-        #scale_y_continuous(trans='log10', breaks=c(0.01,0.1, 1, 100, 10000, 100000), labels = plain, limits = c(0.0015, 300000))
-        ggplot(aes(x=DATE, y=standardisation)) +
-        geom_hline(yintercept=0.02, size=0.1) +
-        scale_y_continuous(trans='log10', breaks=c(0.00001,0.0001, 0.001,0.1, 1, 100, 10000), labels = plain, limits = c(0.000016, 15000)) +
-        ylab(expression(Standardised~Kernel~home~range~(km^2)))
-    }
-    else {
-      p5 <- data.plot.All() %>% ggplot(aes(x=DATE, y=AREA_KM2)) +
-        geom_hline(yintercept=input$cutoff, size=0.1) +
-        scale_y_continuous(trans='log10', breaks=c(0.1, 1, 100, 10000), labels = plain, limits = c(0.009, 1500000)) +
-        ylab(expression(Kernel~home~range~(km^2))) +
-        annotate(geom="text", label=paste0(input$cutoff, "~km^2"), parse=T, x=as.Date("01-05", format="%m-%d"),
-                 y=input$cutoff-offset(), hjust=1, size=1.5, col="darkgrey")
-    }
-    
-    #what both plots have in common
-    p5 <- p5 +
+    p5 <- data.plot.All() %>% ggplot(aes(x=DATE, y=AREA_KM2)) +
+      geom_hline(yintercept=input$cutoff, size=0.1) +
+      scale_y_continuous(trans='log10', breaks=c(0.1, 1, 100, 10000), labels = plain, limits = c(0.009, 1500000)) +
+      ylab(expression(Kernel~home~range~(km^2))) +
+      annotate(geom="text", label=paste0(input$cutoff, "~km^2"), parse=T, x=as.Date("01-05", format="%m-%d"),
+               y=input$cutoff-offset(), hjust=1, size=1.5, col="darkgrey") +
       geom_line(aes(linetype=YEAR), col="grey", size=0.4) + 
       scale_x_date(breaks = c(as.Date("2020-01-01"),as.Date("2020-02-01"),as.Date("2020-03-01"),as.Date("2020-04-01"),
                               as.Date("2020-05-01"),as.Date("2020-06-01"),as.Date("2020-07-01"),as.Date("2020-08-01"),
@@ -738,8 +729,8 @@ server <- function(input, output, session){
       theme(panel.border=element_blank(), axis.line=element_blank(),
             #axis.text.x  = element_text(hjust=-0.5),
             legend.position = "bottom", legend.key.width=unit(1.5,"cm"), legend.box = "vertical") +
-      scale_shape_manual("", values = c("2020"=16, "2019"=17, "2018"=15, "2017"=18, "2016"=16, "2015"=17)) +
-      scale_linetype_manual("", values = c("2020"="solid", "2019"="dashed", "2018"="dotted", "2017"="dotdash", "2016"="longdash", "2015"="dotted"))
+      scale_shape_manual("", values = c("2021"=18, "2020"=16, "2019"=17, "2018"=15, "2017"=18, "2016"=16, "2015"=17)) +
+      scale_linetype_manual("", values = c("2021"="longdash", "2020"="solid", "2019"="dashed", "2018"="dotted", "2017"="dotdash", "2016"="longdash", "2015"="dotted"))
     
     
     if(input$checkbox==TRUE){
@@ -809,18 +800,18 @@ server <- function(input, output, session){
     } 
     else if (input$datasecurity==FALSE) {
       if(input$colouration.All=="Longitude"){
-          p5.5 <- p5 +
-            geom_point(aes(col=CENTER.LON_X, shape=YEAR), cex=0.9, alpha=0.9) +
-            #scale_size(range=c(3,0.5), trans="log") +
-            viridis::scale_color_viridis(limits=c(min(data.plot.All()$CENTER.LON_X), max(data.plot.All()$CENTER.LON_X))) +
-            labs(col = "Longitude")
-        }
+        p5.5 <- p5 +
+          geom_point(aes(col=CENTER.LON_X, shape=YEAR), cex=0.9, alpha=0.9) +
+          #scale_size(range=c(3,0.5), trans="log") +
+          viridis::scale_color_viridis(limits=c(min(data.plot.All()$CENTER.LON_X), max(data.plot.All()$CENTER.LON_X))) +
+          labs(col = "Longitude")
+      }
       else if(input$colouration.All == "Latitude"){
-          p5.5 <- p5 +
-            geom_point(aes(col=CENTER.LAT_Y, shape=YEAR), cex=0.9) +
-            viridis::scale_color_viridis(limits=c(min(data.plot.All()$CENTER.LAT_Y), max(data.plot.All()$CENTER.LAT_Y))) +
-            labs(col = "Latitude")
-        }
+        p5.5 <- p5 +
+          geom_point(aes(col=CENTER.LAT_Y, shape=YEAR), cex=0.9) +
+          viridis::scale_color_viridis(limits=c(min(data.plot.All()$CENTER.LAT_Y), max(data.plot.All()$CENTER.LAT_Y))) +
+          labs(col = "Latitude")
+      }
       else if(input$colouration.All == "Settlement Year"){
         if(dataInput()==1){
           p5.5 <- p5 +
@@ -864,5 +855,4 @@ server <- function(input, output, session){
 ############### 3 - start shinyApp ##############
 
 shinyApp(ui = ui, server = server)
-
 
