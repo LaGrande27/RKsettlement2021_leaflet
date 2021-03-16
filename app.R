@@ -24,13 +24,13 @@ Sys.setlocale("LC_TIME", "C")  #set English hours for correct x-axis
 ############### make a shiny app ################
 #################################################-------------------------------------------------
 
-settlers <- read.table("Settlers_list_Lara_all.csv", header=T, dec=".", sep=";")
 setkde5 <- read.table("KDE_AllSettlers_per_5days_2ppd_m_allbirds_relYears.csv", header=T, dec=".", sep=";") #only relevant years
 setkde5.all <- read.table("KDE_AllSettlers_per_5days_2ppd_m_allbirds.csv", header=T, dec=".", sep=";")
 setkde4 <- read.table("KDE_AllSettlers_per_4days_2ppd_m_allbirds_relYears.csv", header=T, dec=".", sep=";") #only relevant years
 setkde4.all <- read.table("KDE_AllSettlers_per_4days_2ppd_m_allbirds.csv", header=T, dec=".", sep=";")
 setkde3 <- read.table("KDE_AllSettlers_per_3days_2ppd_m_allbirds_relYears.csv", header=T, dec=".", sep=";") #only relevant years
 setkde3.all <- read.table("KDE_AllSettlers_per_3days_2ppd_m_allbirds.csv", header=T, dec=".", sep=";")
+settlers <- read.table("Settlers_list_Lara_all.csv", header=T, dec=".", sep=";")
 settlers.nest <- read.table("list_of_nests_in2after_SettYear_allbirds.csv", header=T, dec=".", sep=";")
 locations <- read.table("Settlement_Potatoes_Locations.csv", header=T, dec=".", sep=";")
 
@@ -52,6 +52,8 @@ res1 <- lapply(list.setkde, function(setkde) {
   setkde
 })
 list2env(res1,.GlobalEnv) #this unnlists the listed dataframes and saves them under their original names !
+setkde <- do.call(rbind, res1)
+setkde$window.length <- lapply(strsplit(row.names(setkde), "\\."), '[[', 1) %>% substr(., 7,7)
 
 list.setkde_sf <- list(setkde5_sf=setkde5,setkde4_sf=setkde4,setkde3_sf=setkde3)
 res2 <- lapply(list.setkde_sf, function(setkde) {
@@ -83,7 +85,9 @@ res.all1 <- lapply(list.setkde.all, function(setkde.all) {
   setkde.all$julian <- julian(setkde.all$DATE, origin=as.Date("2020-01-01")) #as workaround for color legend
   setkde.all
 })
-list2env(res.all1,.GlobalEnv) #this unnlists the listed dataframes and saves them under their original names !
+#list2env(res.all1,.GlobalEnv) #this unnlists the listed dataframes and saves them under their original names !
+setkde.all <- do.call(rbind, res.all1)
+setkde.all$window.length <- lapply(strsplit(row.names(setkde.all), "\\."), '[[', 1) %>% substr(., 7,7)
 
 list.setkde.all_sf <- list(setkde5.all_sf=setkde5.all, setkde4.all_sf=setkde4.all, setkde3.all_sf=setkde3.all)
 res.all2 <- lapply(list.setkde.all_sf, function(setkde.all) {
@@ -258,14 +262,14 @@ server <- function(input, output, session){
   # create a subset of data filtering for chosen bird.ID level(s)
   sub_setkde <- reactive({
     if(dataInput()==1){
-      if(WindowLengthInput()==3) {setkde5[setkde5$ID == input$ID,]}
-      else if (WindowLengthInput()==2) {setkde4[setkde4$ID == input$ID,]}
-      else if (WindowLengthInput()==1) {setkde3[setkde3$ID == input$ID,]}
+      if(WindowLengthInput()==3) {setkde[setkde$ID == input$ID & setkde$window.length == 5,]}
+      else if (WindowLengthInput()==2) {setkde[setkde$ID == input$ID & setkde$window.length == 4,]}
+      else if (WindowLengthInput()==1) {setkde[setkde$ID == input$ID & setkde$window.length == 3,]}
     }
     else if (dataInput()==2){
-      if(WindowLengthInput()==3) {setkde5.all[setkde5.all$ID == input$ID,]}
-      else if (WindowLengthInput()==2) {setkde4.all[setkde4.all$ID == input$ID,]}
-      else if (WindowLengthInput()==1) {setkde3.all[setkde3.all$ID == input$ID,]}
+      if(WindowLengthInput()==3) {setkde.all[setkde.all$ID == input$ID & setkde.all$window.length == 5,]}
+      else if (WindowLengthInput()==2) {setkde.all[setkde.all$ID == input$ID & setkde.all$window.length == 4,]}
+      else if (WindowLengthInput()==1) {setkde.all[setkde.all$ID == input$ID & setkde.all$window.length == 3,]}
     }
   })
   
@@ -691,7 +695,7 @@ server <- function(input, output, session){
     } else {l1} # No points selected; regular plot
   })
   
-
+  
   
   
   ### Panel 2 ----------------------------------------------------------------------------- ###
