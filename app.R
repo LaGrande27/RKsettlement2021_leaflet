@@ -663,8 +663,8 @@ server <- function(input, output, session){
       ) %>%
       ## -- CONTROLS -- ##
       addLayersControl( #control to define which nests are displayed
-        baseGroups = c("3 day-window", "4 day-window", "5 day-window"),
-        overlayGroups = c("home range points", "settlement and potatoes"), #control to define if settlements & potoatoes are displayed
+        baseGroups = c("5 day-window", "4 day-window", "3 day-window"),
+        overlayGroups = c("settlement and potatoes"), #control to define if settlements & potoatoes are displayed
         options = layersControlOptions(collapsed = F),
         position = "topleft"
       ) %>% 
