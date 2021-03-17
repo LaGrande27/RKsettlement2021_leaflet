@@ -91,9 +91,9 @@ res.all1 <- lapply(list.setkde.all, function(setkde.all) {
 #list2env(res.all1,.GlobalEnv) #this unnlists the listed dataframes and saves them under their original names !
 setkde.all <- do.call(rbind, res.all1)
 setkde.all$window.length <- lapply(strsplit(row.names(setkde.all), "\\."), '[[', 1) %>% substr(., 7,7)
-setkde.all5 <- subset(setkde.all, window.length==5)
-setkde.all4 <- subset(setkde.all, window.length==4)
-setkde.all3 <- subset(setkde.all, window.length==3)
+setkde5.all <- subset(setkde.all, window.length==5)
+setkde4.all <- subset(setkde.all, window.length==4)
+setkde3.all <- subset(setkde.all, window.length==3)
 
 list.setkde.all_sf <- list(setkde5.all_sf=setkde5.all, setkde4.all_sf=setkde4.all, setkde3.all_sf=setkde3.all)
 res.all2 <- lapply(list.setkde.all_sf, function(setkde.all) {
@@ -191,9 +191,9 @@ ui <- fluidPage(
                       wellPanel(
                         radioButtons(inputId = "MovingWindowLength",
                                      label = "Moving Window Length",
-                                     choices = list("3 days" = 1,
+                                     choices = list("5 days" = 3,
                                                     "4 days" = 2,
-                                                    "5 days" = 3),
+                                                    "3 days" = 1),
                                      selected = 3)
                       )
                ),
