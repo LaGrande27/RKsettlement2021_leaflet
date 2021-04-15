@@ -1,0 +1,79 @@
+bird_ID;TransmGSM;YEAR;nest.x;nest.y;Sett_year;nest.ID;category;settlement.year;YEARsPL;settlement.yearsPL;earliest_eggs;latest_end;fledglings
+322;BC38EB1D;2020;7.2896;46.771;2020;642;nest;1y after settling;2020;1y after settling;NA;NA;no
+416;KISW01;2020;7.407;46.813;2020;703;nest;settlement year;2020;settlement year;2020-04-18;2020-04-29;no
+330;KIWS14;2020;7.1737;46.8681;2020;696;nest;settlement year;2020;settlement year;NA;NA;no
+270;KIWS30;2019;9.1886;47.4285;2019;597;nest;settlement year;2019;settlement year;2019-05-07;2019-08-02;yes
+270;KIWS30;2020;9.1916;47.4299;2019;698;nest;1y after settling;2020;1y after settling;2020-03-28;2020-06-23;yes
+308;KIWS46;2020;7.3441;46.75;2020;643;nest;settlement year;2020;settlement year;NA;NA;no
+370;KIWS47;2020;7.378;46.8144;2020;647;nest;settlement year;2020;settlement year;NA;NA;no
+349;KIWS48;2020;7.1754;46.8585;2020;627;nest;settlement year;2020;settlement year;2020-04-02;2020-05-29;no
+306;KIWS53;2020;7.2499;46.7855;2020;710;nest;settlement year;2020;settlement year;NA;NA;no
+337;KIWS59;2019;7.1958;46.8925;2019;516;nest;settlement year;2019;settlement year;2019-04-05;2019-05-16;no
+337;KIWS59;2020;7.2038;46.8891;2019;654;nest;1y after settling;2020;1y after settling;2020-03-29;2020-06-24;yes
+430;KIWS60;2020;7.3672;46.8241;2020;684;nest;settlement year;2020;settlement year;2020-04-11;2020-06-04;no
+303;KIWS61;2020;7.3262;46.8578;2020;690;nest;settlement year;2020;settlement year;NA;NA;no
+391;KIWS65;2020;7.3015;46.8098;2019;695;nest;1y after settling;2020;1y after settling;NA;NA;no
+286;KIWS83;2019;6.573;46.331;2019;574;nest;settlement year;2019;settlement year;2019-04-16;2019-05-14;no
+342;KIWS93;2020;7.3896;46.7991;2020;675;nest;settlement year;2020;settlement year;NA;2020-05-22;no
+517;KIWS95;2020;16.5733;49.4215;2020;715;nest;settlement year;2020;settlement year;2020-04-29;2020-07-04;no
+171;SWIK03;2020;6.9515;46.683;2019;712;nest;1y after settling;2020;1y after settling;2020-04-20;2020-07-20;yes
+161;SWIK07;2019;7.7694;47.6992;2019;572;nest;settlement year;2019;settlement year;2019-04-21;2019-07-20;yes
+142;SWIK12;2018;6.8198;46.6255;2018;446;nest;settlement year;2019, 2018;1y after settling, settlement year;2018-04-28;2018-07-24;NA
+142;SWIK12;2019;6.8198;46.6255;2018;446;nest;1y after settling;2019, 2018;1y after settling, settlement year;NA;NA;no
+142;SWIK12;2020;6.8198;46.6254;2018;676;nest;2y after settling;2020;2y after settling;2020-04-12;2020-06-03;no
+137;SWIK17;2017;7.3254;46.869;2017;293;nest;settlement year;2017, 2018;settlement year, 1y after settling;NA;NA;no
+137;SWIK17;2018;7.3254;46.869;2017;293;nest;1y after settling;2017, 2018;settlement year, 1y after settling;2018-04-13;2018-07-09;yes
+137;SWIK17;2019;7.3236;46.8651;2017;533;nest;2y after settling;2019;2y after settling;2019-04-07;2019-07-03;yes
+137;SWIK17;2020;7.326;46.8685;2017;671;nest;3y after settling;2020;3y after settling;2020-03-31;2020-06-26;yes
+82;SWIK23;2019;7.2526;46.7704;2019;512;nest;settlement year;2019;settlement year;2019-04-10;2019-05-21;no
+82;SWIK23;2020;7.2524;46.7704;2019;641;nest;1y after settling;2020;1y after settling;NA;NA;no
+138;SWIK25;2017;7.2762;46.8086;2017;31;nest;settlement year;2017;settlement year;2017-04-25;NA;NA
+138;SWIK25;2018;7.2669;46.8088;2017;429;nest;1y after settling;2018;1y after settling;2018-04-05;2018-07-05;yes
+138;SWIK25;2019;7.2715;46.8058;2017;542;nest;2y after settling;2020, 2019;3y after settling, 2y after settling;2019-04-04;2019-06-30;yes
+138;SWIK25;2020;7.2715;46.8058;2017;542;nest;3y after settling;2020, 2019;3y after settling, 2y after settling;2020-03-27;2020-06-22;yes
+154;SWIK27;2018;7.2562;46.847;2018;421;nest;settlement year;2020, 2018;2y after settling, settlement year;2018-04-18;2018-06-17;no
+154;SWIK27;2020;7.2562;46.847;2018;421;nest;2y after settling;2020, 2018;2y after settling, settlement year;2020-04-01;2020-06-27;yes
+154;SWIK27;2019;7.2556;46.8471;2018;537;nest;1y after settling;2019;1y after settling;2019-04-03;2019-06-29;yes
+151;SWIK31;2019;7.0953;46.5557;2019;593;nest;settlement year;2019;settlement year;NA;2019-05-12;no
+172;SWIK33;2018;7.1309;46.7099;2018;430;nest;settlement year;2018;settlement year;2018-04-03;2018-06-19;yes
+172;SWIK33;2019;7.1329;46.7004;2018;555;nest;1y after settling;2019;1y after settling;2019-04-06;2019-07-02;yes
+172;SWIK33;2020;7.1323;46.6994;2018;673;nest;2y after settling;2020;2y after settling;2020-04-05;2020-06-05;no
+140;SWIK38;2018;7.8022;47.1033;2018;461;nest;settlement year;2018, 2020, 2019;settlement year, 2y after settling, 1y after settling;2018-04-27;2018-07-23;yes
+140;SWIK38;2019;7.8022;47.1033;2018;461;nest;1y after settling;2018, 2020, 2019;settlement year, 2y after settling, 1y after settling;2019-06-18;2019-04-19;yes
+140;SWIK38;2020;7.8022;47.1033;2018;461;nest;2y after settling;2018, 2020, 2019;settlement year, 2y after settling, 1y after settling;2020-04-23;2020-06-04;no
+165;SWIK46;2018;7.0183;46.7601;2018;424;nest;settlement year;2018;settlement year;NA;NA;no
+165;SWIK46;2019;7.0202;46.7597;2018;580;nest;1y after settling;2020, 2019;2y after settling, 1y after settling;2019-04-27;2019-05-22;no
+165;SWIK46;2020;7.0202;46.7597;2018;580;nest;2y after settling;2020, 2019;2y after settling, 1y after settling;2020-04-13;2020-06-15;no
+157;SWIK52;2020;8.825;47.6541;2020;699;nest;settlement year;2020;settlement year;2020-04-14;2020-05-25;no
+40;SWIK69;2019;7.3477;46.8702;2019;136;nest;settlement year;2020, 2019;1y after settling, settlement year;NA;NA;no
+40;SWIK69;2020;7.3477;46.8702;2019;136;nest;1y after settling;2020, 2019;1y after settling, settlement year;2020-04-08;2020-07-06;yes
+228;SWIK71;2018;5.402;46.0458;2018;471;nest;settlement year;2018;settlement year;2018-05-01;NA;no
+228;SWIK71;2019;5.3731;46.0069;2018;575;nest;1y after settling;2019;1y after settling;NA;NA;no
+228;SWIK71;2020;5.3655;46.0289;2018;723;nest;2y after settling;2020;2y after settling;NA;2020-06-18;no
+5;SWIK84;2018;7.1634;46.8596;2018;439;nest;settlement year;2018;settlement year;2018-04-24;2018-05-23;no
+5;SWIK84;2019;7.1641;46.8563;2018;552;nest;1y after settling;2019;1y after settling;2019-04-15;2019-05-17;no
+5;SWIK84;2020;7.1565;46.8535;2018;616;nest;2y after settling;2020;2y after settling;2020-03-30;2020-06-25;yes
+91;SWIK88;2020;7.2896;46.771;2020;642;nest;1y after settling;2020;1y after settling;NA;NA;no
+124;SWIK90;2020;7.8359;47.0952;2018;719;nest;settlement year;2020;settlement year;NA;NA;no
+6;SWIK95;2019;7.1791;46.8017;2019;547;nest;settlement year;2020, 2019;1y after settling, settlement year;2019-04-08;2019-07-04;yes
+6;SWIK95;2020;7.1791;46.8017;2019;547;nest;1y after settling;2020, 2019;1y after settling, settlement year;2020-04-01;2020-06-27;yes
+26;WSIK06;2018;7.2861;46.8891;2018;454;nest;settlement year;2018;settlement year;2018-04-22;2018-07-24;yes
+26;WSIK06;2019;7.288;46.8888;2018;557;nest;1y after settling;2019;1y after settling;2019-04-15;2019-06-25;yes
+26;WSIK06;2020;7.2826;46.8884;2018;666;nest;2y after settling;2020;2y after settling;2020-04-04;2020-06-30;yes
+37;WSIK07;2019;7.4138;46.8396;2018;535;nest;1y after settling;2019;1y after settling;2019-04-12;2019-05-21;no
+37;WSIK07;2020;7.4128;46.8399;2018;702;nest;2y after settling;2020;2y after settling;2020-04-11;2020-06-21;no
+29;WSIK12;2020;7.3017;46.8325;2019;644;nest;1y after settling;2020;1y after settling;2020-04-18;2020-05-17;no
+116;WSIK18;2019;7.2481;46.7721;2019;589;nest;settlement year;2019, 2020;settlement year, 1y after settling;2019-04-21;2019-07-17;yes
+116;WSIK18;2020;7.2481;46.7721;2019;589;nest;1y after settling;2019, 2020;settlement year, 1y after settling;2020-04-14;2020-07-10;yes
+43;WSIK25;2019;7.187;46.7758;2019;591;nest;settlement year;2019;settlement year;NA;NA;no
+399;WSIK43;2020;7.3287;46.8079;2020;706;nest;settlement year;2020;settlement year;2020-04-19;2020-07-15;yes
+98;WSIK49;2019;7.2403;46.8276;2018;581;nest;1y after settling;2019;1y after settling;2019-04-23;2019-06-21;yes
+98;WSIK49;2020;7.2393;46.8255;2018;637;nest;2y after settling;2020;2y after settling;2020-04-10;2020-07-06;yes
+95;WSIK50;2019;7.2832;46.7817;2019;544;nest;settlement year;2019;settlement year;NA;NA;no
+95;WSIK50;2020;7.2826;46.7821;2019;711;nest;1y after settling;2020;1y after settling;2020-04-16;2020-06-05;no
+84;WSIK55;2020;7.226;46.7463;2019;683;nest;1y after settling;2020;1y after settling;2020-04-17;2020-07-13;yes
+49;WSIK57;2019;7.3286;46.843;2019;590;nest;settlement year;2019;settlement year;2019-05-02;NA;no
+74;WSIK68;2020;7.2082;46.7423;2019;669;nest;1y after settling;2020;1y after settling;2020-04-06;2020-06-19;no
+251;WSIK73;2020;7.3509;46.8571;2020;674;nest;settlement year;2020;settlement year;NA;NA;no
+297;WSIK79;2019;13.1281;48.1242;2019;602;nest;settlement year;2019;settlement year;2019-05-06;2019-08-01;NA
+325;WSIK96;2020;7.3533;46.8086;2020;705;nest;settlement year;2020;settlement year;NA;NA;no
