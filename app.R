@@ -32,7 +32,7 @@ setkde3 <- read.table("KDE_AllSettlers_per_3days_2ppd_m_allbirds_relYears.csv", 
 setkde3.all <- read.table("KDE_AllSettlers_per_3days_2ppd_m_allbirds.csv", header=T, dec=".", sep=";")
 settlers <- read.table("Settlers_list_Lara_all.csv", header=T, dec=".", sep=";")
 settlers.nest <- read.table("list_of_nests_in2after_SettYear_allbirds.csv", header=T, dec=".", sep=";")
-locations <- read.table("Settlement_Potatoes_Locations.csv", header=T, dec=".", sep=";")
+locations <- read.table("Settlement_Potatoes_Locations 20210525.csv", header=T, dec=".", sep=";")
 
 # dataset: setkde ----------------------------------------------------
 list.setkde <- list(setkde5=setkde5, setkde4=setkde4, setkde3=setkde3)
@@ -106,18 +106,15 @@ setkde.all_sf <- do.call(rbind, res.all2)
 setkde.all_sf$window.length <- lapply(strsplit(row.names(setkde.all_sf), "\\."), '[[', 1) %>% substr(., 7,7)
 
 
-#dataset: settlers.nest ----------------------------------------------------
+# dataset: settlers.nest ----------------------------------------------------
 settlers.nest$settlement.year <- factor(settlers.nest$settlement.year, levels=c("settlement year","1y after settling","2y after settling","3y after settling"))
 settlers.nest_sf <- settlers.nest %>% 
   st_as_sf(coords=c("nest.x","nest.y")) %>% 
   st_set_crs(4326) #this uses WGS84 (expected by leaflet)
 
 
-#dataset: locations of Settlement + Potatoes ---------------------------------------
-locations$type <- sub("\\_.*", "", locations$Type) %>% as.factor
-locations$cutoff <- str_sub(locations$Type,-1,-1) %>% as.numeric
+# dataset: locations of Settlement + Potatoes ---------------------------------------
 settlement_loc <- locations %>% filter(!is.na(LON)) %>%
-  arrange(TransmGSM, desc(cutoff)) %>%
   st_as_sf(coords=c("LON","LAT")) %>% 
   st_set_crs(4326) #this uses WGS84 (expected by leaflet)
 # for leaflet plot 2; the visualisation of all non-Spain/France-wintering, non-migration GPS points
@@ -157,7 +154,7 @@ ui <- fluidPage(
                                    label = "Data",
                                    choices = list("Relevant years" = 1,
                                                   "All years" = 2),
-                                   selected = 1)
+                                   selected = 2)
                ),
                # Change cutoff/threshold value of home range. Only home ranges below that value will be considered for settlements and potatoes
                column(4,
@@ -166,7 +163,7 @@ ui <- fluidPage(
                                   min = 3,
                                   max = 50,
                                   step = 1,
-                                  value = 6)
+                                  value = 9)
                )
              ),
              
@@ -187,30 +184,30 @@ ui <- fluidPage(
                                       label = HTML("grey contour = on migration,<br />black outline = departure/arrival day with sufficient data"), 
                                       value=TRUE)
                       ),
+                      checkboxInput(inputId = "checkbox.highlight.pot.pot",
+                                    label = "Highlight points below cutoff (Mar-Jun)",
+                                    value = T),
                       # show migration dates
-                      wellPanel(
                         radioButtons(inputId = "MovingWindowLength",
                                      label = "Moving Window Length",
                                      choices = list("5 days" = 3,
                                                     "4 days" = 2,
                                                     "3 days" = 1),
-                                     selected = 3)
-                      )
+                                     selected = 1),
+                      verbatimTextOutput("plot.Ind.potpot")
                ),
                column(9,
                       plotOutput(outputId = "plot.Individual",
                                  width = "auto", height = "350", 
                                  click = "plot_click_Ind",
-                                 brush = "plot_brush_Ind")
-               )
+                                 brush = "plot_brush_Ind"),
+                      verbatimTextOutput("plot.Ind.click_brush")
+                      )
              ),
              # Show data of points when clicking on them
              fluidRow(
                column(3, offset=0,
                       htmlOutput("warning")
-               ),
-               column(9, offset=0,
-                      verbatimTextOutput("plot.Ind.click_brush")
                )
              ),
              
@@ -329,6 +326,14 @@ server <- function(input, output, session){
                    col="black")
     }
     
+    if(input$checkbox.highlight.pot.pot==TRUE){
+      p2 <- p2 +
+        geom_point(data=subset(sub_setkde(), DATE>="2020-03-01" & DATE <="2020-07-31" & 
+                                 AREA_KM2<=input$cutoff & 
+                                 settlement.year!="settlement year" & settlement.year!="1y after settling" & settlement.year!="2y after settling" & settlement.year!="3y after settling"), 
+                   aes(shape=YEAR), cex=3, col="yellow", show.legend = F)
+    }
+    
     p2.5 <- p2 +
       geom_point(aes(col=settlement.year,
                      shape=YEAR), cex=0.9) +
@@ -359,6 +364,7 @@ server <- function(input, output, session){
     brush <- brushedPoints(sub_setkde(), input$plot_brush_Ind) #showing points near brush
     if(nrow(click)>0) {
       click <- click[order(click[,2] ), ] #order by START_DATE
+      row.names(click) <- c(1:nrow(click))
       click[,c(2:4,6:7,11)] #keep only interesting rows, and only rows without factors
     } 
     else if(nrow(brush)>0) {
@@ -372,9 +378,22 @@ server <- function(input, output, session){
       if(nrow(brush)>2) print(minmax)
       if(nrow(brush)<21) print(brush1)
     } 
-    else {cat("Click on, or brush over the plot.\nBrushed points will be highlighted in the map below.")}
+    else {
+      cat("Click on, or brush over the plot.\nBrushed points will be highlighted in the map below.\n\nPoints in March-June below cutoff: ", nrow(subset(sub_setkde(), DATE>="2020-03-01" & DATE <="2020-06-30" & AREA_KM2<=input$cutoff & settlement.year!="settlement year" & settlement.year!="1y after settling" & settlement.year!="2y after settling" & settlement.year!="3y after settling")), sep="")
+      }
   })
   
+  output$plot.Ind.potpot <- renderPrint({
+    potpot <- subset(sub_setkde(), DATE>="2020-03-01" & DATE <="2020-07-31" & 
+                       AREA_KM2<=input$cutoff & 
+                       on.migration=="no" &
+                       settlement.year!="settlement year" & settlement.year!="1y after settling" & settlement.year!="2y after settling" & settlement.year!="3y after settling")
+    potpot <- potpot %>%dplyr::select(START_DATE)
+    if(nrow(potpot) > 0) {
+      row.names(potpot) <- c(1:nrow(potpot))
+      potpot
+      }
+    })
   
   
   ### --- Home range centers below threshold on a map --- ###
@@ -443,7 +462,7 @@ server <- function(input, output, session){
     ### make colour palette for Date and Year -----------------------------------------------
     pal.date <- colorNumeric(palette = viridis(200), domain = c(0,366), reverse=T) #color legend for date (workaround with julian dates to have numeric values)
     pal.nest <- colorFactor(palette = c('#73D055FF', '#FDE725FF', 'orange', 'chocolate'), domain = NULL)
-    pal.sepo <- colorFactor(palette = c("cyan", "#CC0066", "blue", "orange"), domain = NULL)
+    pal.sepo <- colorFactor(palette = c("orange", "blue"), domain = NULL)
     # !!! order has to match level order of settlement.year and settlers.nest !!! #
     
     if(dataInput()==1){ # display only relevant years
@@ -451,30 +470,30 @@ server <- function(input, output, session){
       pal.year <- colorFactor(palette = c('#440154FF', '#39568CFF', '#1F968BFF', '#73D055FF', '#FDE725FF', 'orange', 'chocolate'), domain = NULL)
       
       ### legend for settlement.year, on.migration and nest location ### ----------------------
-      colors <- c(rep("white",7),"red","white","blue","cyan","orange","#CC0066") #fill inside borders of circles
+      colors <- c(rep("white",7),"red","white","blue","orange") #fill inside borders of circles
       labels <- c("-3 years", "-2 years", "-1 year", "settlement", "+1 year", "+2 years", "+3 years",
-                  "nest", "on migration", "settlement", "last potato", "'spring' potato", "longest potato")
-      sizes <- c(rep(12,7),2,12,rep(2,4))
+                  "nest", "on migration", "settlement", "potato")
+      sizes <- c(rep(12,7),2,12,rep(2,2))
       shapes <- "circle"
-      margin.top <- c(rep(5,7),8,5,rep(8,4)) #margin from circles to each other, distance from top
-      margin.left <- c(rep(0,7),2,0,rep(2,4)) #margin from circles to left side (to center the "nest" circle)
+      margin.top <- c(rep(5,7),8,5,rep(8,2)) #margin from circles to each other, distance from top
+      margin.left <- c(rep(0,7),2,0,rep(2,2)) #margin from circles to left side (to center the "nest" circle)
       borders <- c('#440154FF', '#39568CFF', '#1F968BFF', '#73D055FF', '#FDE725FF', 'orange', 'chocolate',
-                   'red', 'gray', 'blue','cyan','orange','#CC0066')
+                   'red', 'gray', 'blue','orange')
     } 
     else { # display all years
       #  ### make colour palette for Date and Year -----------------------------------------------
       pal.year <- colorFactor(palette = c('#CC00CC', '#9900CC', '#440154FF', '#39568CFF', '#1F968BFF', '#73D055FF', '#FDE725FF', 'orange', 'chocolate'), domain = NULL)
       
       ### legend for settlement.year, on.migration and nest location ### ----------------------
-      colors <- c(rep("white",9),"red","white","blue","cyan","orange","#CC0066") #fill inside borders of circles
+      colors <- c(rep("white",9),"red","white","blue","orange") #fill inside borders of circles
       labels <- c("-5 years", "-4 years", "-3 years", "-2 years", "-1 year", "settlement", "+1 year", "+2 years", "+3 years",
-                  "nest", "on migration", "settlement", "last potato", "'spring' potato", "longest potato")
-      sizes <- c(rep(12,9),2,12,rep(2,4))
+                  "nest", "on migration", "settlement", "potato")
+      sizes <- c(rep(12,9),2,12,rep(2,2))
       shapes <- "circle"
-      margin.top <- c(rep(5,9),8,5,rep(8,4)) #margin from circles to each other, distance from top
-      margin.left <- c(rep(0,9),2,0,rep(2,4)) #margin from circles to left side (to center the "nest" circle)
+      margin.top <- c(rep(5,9),8,5,rep(8,2)) #margin from circles to each other, distance from top
+      margin.left <- c(rep(0,9),2,0,rep(2,2)) #margin from circles to left side (to center the "nest" circle)
       borders <- c('#CC00CC', '#9900CC', '#440154FF', '#39568CFF', '#1F968BFF', '#73D055FF', '#FDE725FF', 'orange', 'chocolate',
-                   'red', 'gray', 'blue', 'cyan',' orange', '#CC0066')
+                   'red', 'gray', 'blue',' orange')
     }
     
     ### legend for settlement.year, on.migration and nest location ### ----------------------
@@ -551,17 +570,23 @@ server <- function(input, output, session){
       ) %>%  
       addMapPane("nest", zIndex = 430 #puts nest on near-top of all layers
       ) %>%  
-      addMapPane("settlements", zIndex = 431 #puts settlements on top of all layers
+      addMapPane("settlements", zIndex = 435 #puts settlements on top of all layers
+      ) %>%  
+      addMapPane("KDE.points", zIndex = 425 #puts settlements on top of all layers
+      ) %>%  
+      addMapPane("migration", zIndex = 415 #puts settlements on top of all layers
+      ) %>%  
+      addMapPane("highlights", zIndex = 405 #puts settlements on top of all layers
       ) %>%  
       ## -- SETTLEMENT CENTERS -- ##
       addCircleMarkers(
         data=sub.sepo_loc(),
-        radius = ~(cutoff/2),
-        color = ~pal.sepo(type),
+        radius = 3,
+        color = ~pal.sepo(Type),
         group = "settlement and potatoes",
-        stroke = FALSE, fillOpacity = ~7/cutoff,
+        stroke = FALSE, fillOpacity = 1,
         options = pathOptions(pane = "settlements"),
-        popup = ~ paste0(type," potato<br>cutoff: ", cutoff, " km<sup>2</sup><br>", Start," - ", End)
+        popup = ~ paste0(Type, "<br>", Start," - ", End)
       ) %>% 
       addCircles(
         data=sub.sepo_loc(),
@@ -578,6 +603,7 @@ server <- function(input, output, session){
         group = "3 day-window",
         clusterOptions = markerClusterOptions(maxClusterRadius = 10,
                                               disableClusteringAtZoom=11),
+        options = pathOptions(pane = "KDE.points"),
         radius = ~AREA_KM2+make.visible,
         color = ~pal.year(settlement.year),  #border: year
         fillColor = ~pal.date(julian), fillOpacity = 1,         #inside: date in the year
@@ -590,6 +616,7 @@ server <- function(input, output, session){
         group = "4 day-window",
         clusterOptions = markerClusterOptions(maxClusterRadius = 10,
                                               disableClusteringAtZoom=11),
+        options = pathOptions(pane = "KDE.points"),
         radius = ~AREA_KM2+make.visible,
         color = ~pal.year(settlement.year),  #border: year
         fillColor = ~pal.date(julian), fillOpacity = 1,         #inside: date in the year
@@ -602,6 +629,7 @@ server <- function(input, output, session){
         group = "5 day-window",
         clusterOptions = markerClusterOptions(maxClusterRadius = 10,
                                               disableClusteringAtZoom=11),
+        options = pathOptions(pane = "KDE.points"),
         radius = ~AREA_KM2+make.visible,
         color = ~pal.year(settlement.year),  #border: year
         fillColor = ~pal.date(julian), fillOpacity = 1,         #inside: date in the year
@@ -613,6 +641,7 @@ server <- function(input, output, session){
       addCircleMarkers( #indicator for migration dates (#grey circles)
         data=subset(sub_setkde_cutoff.m(), window.length==3),
         group = "3 day-window",
+        options = pathOptions(pane = "migration"),
         radius = ~(1.05*AREA_KM2+3),
         color = "gray",
         stroke = T, fill = F,
@@ -621,6 +650,7 @@ server <- function(input, output, session){
       addCircleMarkers( #indicator for migration dates (#grey circles)
         data=subset(sub_setkde_cutoff.m(), window.length==4),
         group = "4 day-window",
+        options = pathOptions(pane = "migration"),
         radius = ~(1.05*AREA_KM2+3),
         color = "gray",
         stroke = T, fill = F,
@@ -629,6 +659,7 @@ server <- function(input, output, session){
       addCircleMarkers( #indicator for migration dates (#grey circles)
         data=subset(sub_setkde_cutoff.m(), window.length==5),
         group = "5 day-window",
+        options = pathOptions(pane = "migration"),
         radius = ~(1.05*AREA_KM2+3),
         color = "gray",
         stroke = T, fill = F,
@@ -663,7 +694,7 @@ server <- function(input, output, session){
       ) %>%
       ## -- CONTROLS -- ##
       addLayersControl( #control to define which nests are displayed
-        baseGroups = c("5 day-window", "4 day-window", "3 day-window"),
+        baseGroups = c("3 day-window", "4 day-window", "5 day-window"),
         overlayGroups = c("settlement and potatoes"), #control to define if settlements & potoatoes are displayed
         options = layersControlOptions(collapsed = F),
         position = "topleft"
@@ -684,21 +715,67 @@ server <- function(input, output, session){
       ) %>% 
       addMeasure(
         position = "bottomleft",
-        primaryLengthUnit = "kilometers"
+        primaryLengthUnit = "kilometers",
+        activeColor = "#3D535D",
+        completedColor = "#7D4479"
       )
     
     if (length(input$plot_brush_Ind) > 0) { #points selected: highlight them in this leaflet plot
-      l1 %>% 
+      l1 <- l1 %>% 
         addCircleMarkers( #highlight the points selected in first graph
           data=highlightData(),
-          radius = ~AREA_KM2+make.visible+7,
-          fillColor = "yellow",
+          options = pathOptions(pane = "highlights"),
+          radius = ~AREA_KM2+make.visible+6,
+          fillColor = "orange",
           fillOpacity = 0.75,         
           stroke = F,
           popup = ~ paste0(START_DATE, "<br>home range: ", AREA_KM2, " km<sup>2</sup><br>",
                            settlement.year,"<br>GPS points: ", NR_POINTS)
         )
+      l1
     } else {l1} # No points selected; regular plot
+    
+    if (input$checkbox.highlight.pot.pot == T) {
+      l1 <- l1 %>% 
+        addCircleMarkers(
+          data=subset(sub_setkde_cutoff(), DATE>="2020-03-01" & DATE <="2020-07-31" & 
+                        AREA_KM2<=input$cutoff & 
+                        on.migration =="no" &
+                        settlement.year!="settlement year" & settlement.year!="1y after settling" & settlement.year!="2y after settling" & settlement.year!="3y after settling" &
+                        window.length==3), 
+          options = pathOptions(pane = "highlights"),
+          group = "3 day-window",
+          radius = ~AREA_KM2+make.visible+30,
+          fillColor = "yellow",
+          fillOpacity = 0.75,         
+          stroke = F
+        ) %>%
+        addCircleMarkers(
+          data=subset(sub_setkde_cutoff(), DATE>="2020-03-01" & DATE <="2020-07-31" & 
+                        AREA_KM2<=input$cutoff & 
+                        on.migration =="no" &
+                        settlement.year!="settlement year" & settlement.year!="1y after settling" & settlement.year!="2y after settling" & settlement.year!="3y after settling" &
+                        window.length==4), 
+          options = pathOptions(pane = "highlights"),
+          group = "4 day-window",
+          radius = ~AREA_KM2+make.visible+30,
+          fillColor = "yellow",
+          fillOpacity = 0.75,         
+          stroke = F
+        ) %>%
+        addCircleMarkers(
+          data=subset(sub_setkde_cutoff(), DATE>="2020-03-01" & DATE <="2020-07-31" & 
+                        AREA_KM2<=input$cutoff & 
+                        on.migration =="no" &
+                        settlement.year!="settlement year" & settlement.year!="1y after settling" & settlement.year!="2y after settling" & settlement.year!="3y after settling" &
+                        window.length==5), 
+          group = "5 day-window",
+          radius = ~AREA_KM2+make.visible+30,
+          fillColor = "yellow",
+          fillOpacity = 0.75,         
+          stroke = F
+        )
+      } else {l1}
   })
   
   
