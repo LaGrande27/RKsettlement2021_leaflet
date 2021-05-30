@@ -812,7 +812,7 @@ server <- function(input, output, session){
       theme_classic() +
       xlab(NULL) +
       annotation_logticks(side="l", size=0.4, colour="black") +
-      facet_rep_wrap(~ID, scales="fixed", ncol=4, nrow=20) +
+      facet_rep_wrap(~ID, scales="fixed", ncol=4, nrow=24) +
       theme(panel.border=element_blank(), axis.line=element_blank(),
             #axis.text.x  = element_text(hjust=-0.5),
             legend.position = "bottom", legend.key.width=unit(1.5,"cm"), legend.box = "vertical") +
