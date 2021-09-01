@@ -32,7 +32,7 @@ setkde3 <- read.table("KDE_AllSettlers_per_3days_2ppd_m_allbirds_relYears.csv", 
 setkde3.all <- read.table("KDE_AllSettlers_per_3days_2ppd_m_allbirds.csv", header=T, dec=".", sep=";")
 settlers <- read.table("Settlers_list_Lara_all.csv", header=T, dec=".", sep=";")
 settlers.nest <- read.table("list_of_nests_in2after_SettYear_allbirds.csv", header=T, dec=".", sep=";")
-locations <- read.table("Settlement_Potatoes_Locations 20210525.csv", header=T, dec=".", sep=";")
+locations <- read.table("Settlement_Potatoes_Locations final.csv", header=T, dec=".", sep=";")
 
 # dataset: setkde ----------------------------------------------------
 list.setkde <- list(setkde5=setkde5, setkde4=setkde4, setkde3=setkde3)
